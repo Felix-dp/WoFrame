@@ -97,6 +97,35 @@ function satisfies(version, range) {
 
 const platformKey = process.platform === 'win32' ? 'windows' : process.platform === 'darwin' ? 'darwin' : 'linux';
 
+export function findHypit() {
+  const result = spawnSync('hypit', ['--version'], {shell: platformKey === 'windows', stdio: 'ignore', timeout: 3000});
+  return result.status === 0;
+}
+
+export function hypitReadiness() {
+  if (!findHypit()) {
+    return {ready: false, reason: '未找到 Hypit CLI', next: 'npm install --global @hypit/hypit'};
+  }
+  const next = '在当前 Hypit 项目目录运行 hypit doctor，按提示配置 Runtime Profile 和所用服务';
+  const result = spawnSync('hypit', ['doctor', '--json'], {
+    encoding: 'utf8', shell: platformKey === 'windows', timeout: 30000,
+  });
+  let report;
+  try {
+    report = JSON.parse(result.stdout);
+  } catch {
+    return {ready: false, reason: '无法读取 Hypit 环境检查结果', next};
+  }
+  if (!report.profileSource || report.profileSource === 'none') {
+    return {ready: false, reason: '当前 Hypit 项目没有 Runtime Profile', next: 'hypit runtime init'};
+  }
+  if (result.status !== 0 || report.ok !== true) {
+    return {ready: false, reason: 'Hypit Runtime 或服务配置未通过检查', next};
+  }
+  const warnings = (report.diagnostics ?? []).filter(item => item.severity === 'warning').map(item => item.code);
+  return {ready: true, warnings};
+}
+
 export function evaluateRequirements() {
   const requirements = loadRequirements();
   const results = [];
@@ -146,6 +175,7 @@ export function installMissing(report) {
       continue;
     }
     if (!row.fix) throw new Error('缺少 ' + row.id + '，但没有当前平台的安装命令');
+    if (done.includes(row.fix)) continue;
     execFileSync(row.fix, {shell: true, stdio: 'inherit', cwd: repoRoot});
     done.push(row.fix);
   }

@@ -21,7 +21,7 @@ handbooks/<track>/<系列名>.json
 node scripts/woframe.mjs save-handbook public/work/episode-1/episode.json
 ```
 
-赛道和系列名从项目的 `preferences.track`、`preferences.series` 里取，缺一个就报错——先确认赛道再落盘。
+赛道和系列名从项目的 `preferences.track`、`preferences.series` 里取。赛道必填，系列名未填写时使用本集标题。生成的 JSON 由 Git 忽略。
 
 ## 怎么用
 
