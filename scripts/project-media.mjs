@@ -31,7 +31,10 @@ export function sceneTiming(episode, projectDir, {fit = false} = {}) {
   episode.scenes.forEach((scene, index) => {
     const audio = scene.audio ? duration(scene.audio, 'audio') : null;
     const video = scene.video ? duration(scene.video, 'video') : null;
-    const reference = audio ?? (episode.route === 'talking-head' ? video : null);
+    const trimmed = scene.videoStartFrame != null;
+    const offset = (scene.videoStartFrame ?? 0) / episode.fps;
+    const available = video === null ? null : video - offset;
+    const reference = audio ?? (episode.route === 'talking-head' && !trimmed ? video : null);
     const frames = reference === null ? scene.frames : Math.max(1, Math.round(reference * episode.fps));
     const playable = (fit ? frames : scene.frames) / episode.fps;
     if (frames !== scene.frames) {
@@ -43,11 +46,13 @@ export function sceneTiming(episode, projectDir, {fit = false} = {}) {
       warnings.push({scene: index + 1, audio: scene.audio, audioSeconds: +audio.toFixed(2),
         playableSeconds: +playable.toFixed(2), suggestedFrames: frames});
     }
-    const videoDifference = playable - video;
-    if (video !== null && (videoDifference > 0.2 ||
-        (episode.route === 'talking-head' && audio === null && Math.abs(videoDifference) > 0.2))) {
+    const videoDifference = playable - available;
+    const tolerance = trimmed ? 0.5 / episode.fps : 0.2;
+    if (available !== null && (available <= 0 || videoDifference > tolerance ||
+        (episode.route === 'talking-head' && !trimmed && audio === null && Math.abs(videoDifference) > 0.2))) {
       warnings.push({scene: index + 1, video: scene.video, videoSeconds: +video.toFixed(2),
-        playableSeconds: +playable.toFixed(2), suggestedFrames: Math.max(1, Math.round(video * episode.fps))});
+        ...(trimmed && {videoStartFrame: scene.videoStartFrame}),
+        playableSeconds: +playable.toFixed(2), suggestedFrames: Math.max(0, Math.round(available * episode.fps))});
     }
   });
   return {warnings, changes};

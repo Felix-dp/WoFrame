@@ -1,0 +1,59 @@
+{
+  "title": "从展墙看一段校园故事",
+  "route": "talking-head",
+  "theme": "paper",
+  "ratio": "16:9",
+  "fps": 30,
+  "preferences": {
+    "track": "persona",
+    "pipShape": "rounded"
+  },
+  "scenes": [
+    {
+      "frames": 66,
+      "video": "presenter.mp4",
+      "videoStartFrame": 0,
+      "caption": "看一面展墙，先从照片入手。"
+    },
+    {
+      "frames": 108,
+      "video": "presenter.mp4",
+      "videoStartFrame": 66,
+      "text": "照片和说明各看什么？",
+      "caption": "照片给场景，说明补充时间与背景。",
+      "motion": {
+        "speaker": "pip",
+        "pipCrop": {"x": 30, "y": 20, "zoom": 2},
+        "layout": "compare",
+        "relation": "+",
+        "beats": [
+          {"label": "照片", "detail": "看人物和场景", "at": 0.18},
+          {"label": "说明", "detail": "看时间和背景", "at": 0.52}
+        ]
+      }
+    },
+    {
+      "frames": 114,
+      "video": "presenter.mp4",
+      "videoStartFrame": 174,
+      "text": "把线索连起来",
+      "caption": "先辨认照片，再对照说明。",
+      "motion": {
+        "speaker": "pip",
+        "pipCrop": {"x": 30, "y": 20, "zoom": 2},
+        "layout": "steps",
+        "beats": [
+          {"label": "辨认照片", "at": 0.16},
+          {"label": "对照说明", "at": 0.48}
+        ],
+        "focus": {"beat": 1, "at": 0.7}
+      }
+    },
+    {
+      "frames": 72,
+      "video": "presenter.mp4",
+      "videoStartFrame": 288,
+      "caption": "把图片和文字放在一起看。"
+    }
+  ]
+}

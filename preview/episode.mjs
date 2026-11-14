@@ -1,3 +1,5 @@
+import {palettes, pipShapes, validateMotion} from './motion.mjs';
+
 export const tracks = ['traffic', 'vertical', 'persona'];
 
 export const episodeSizes = {
@@ -24,6 +26,9 @@ export function validateEpisode(project) {
   }
   const track = project.preferences?.track;
   if (track != null && !tracks.includes(track)) throw new Error(`赛道须为 ${tracks.join('、')}`);
+  if (project.preferences?.pipShape != null && !pipShapes.includes(project.preferences.pipShape)) {
+    throw new Error('preferences.pipShape 须为 rounded 或 circle');
+  }
   if (typeof ratio !== 'string' || !Object.hasOwn(episodeSizes, ratio)) {
     throw new Error(`画幅须为 ${Object.keys(episodeSizes).join('、')}`);
   }
@@ -31,15 +36,22 @@ export function validateEpisode(project) {
     throw new Error('请使用 1–60 的整数 FPS');
   }
   if (!Array.isArray(scenes) || !scenes.length) throw new Error('请添加分镜');
+  if (project.theme != null && (typeof project.theme !== 'string' || !Object.hasOwn(palettes, project.theme))) throw new Error('theme 须为 ink 或 paper');
   localAsset(bgm);
   let duration = 0;
   scenes.forEach((scene, index) => {
     try {
       if (!Number.isInteger(scene?.frames) || scene.frames < 1) throw new Error('帧数必须是正整数');
       if (route === 'talking-head' && !scene.video) throw new Error('缺少口播视频');
+      if (scene.videoStartFrame != null &&
+          (!scene.video || !Number.isSafeInteger(scene.videoStartFrame) || scene.videoStartFrame < 0 ||
+            !Number.isSafeInteger(scene.videoStartFrame + scene.frames))) {
+        throw new Error('videoStartFrame 须配合视频填写，使用非负整数帧');
+      }
       if ([scene.text, scene.caption].some(value => value != null && typeof value !== 'string')) {
         throw new Error('画面文字和字幕须为字符串');
       }
+      validateMotion(scene);
       localAsset(scene.video);
       localAsset(scene.audio);
       duration += scene.frames;

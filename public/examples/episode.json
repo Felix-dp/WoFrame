@@ -1,19 +1,55 @@
 {
-  "title": "速度表在测什么？",
+  "title": "机会成本：你放弃了什么？",
   "route": "faceless",
+  "theme": "paper",
   "fps": 30,
   "preferences": {
     "track": "vertical",
-    "series": "零基础导数",
-    "audience": "第一次接触导数的高中生",
-    "targetSeconds": 10,
-    "pace": "每镜一个概念",
-    "platform": "短视频",
-    "ratio": "9:16",
-    "visualStyle": "深色图解"
+    "series": "零基础经济学",
+    "ratio": "9:16"
   },
   "scenes": [
-    {"frames": 150, "text": "速度表在测什么？", "caption": "速度表显示的是当下的速度。"},
-    {"frames": 150, "text": "把测量时间缩短", "caption": "观察的时间越短，平均速度越接近此刻的速度。"}
+    {
+      "frames": 102,
+      "text": "周末只有两小时",
+      "caption": "你可以去兼职，也可以做自己的项目。",
+      "motion": {
+        "layout": "compare",
+        "relation": "或",
+        "beats": [
+          {"label": "去兼职", "detail": "这两小时能赚到 80 元", "type": "button", "at": 0.16},
+          {"label": "做项目", "type": "button", "at": 0.48}
+        ],
+        "focus": {"beat": 1, "at": 0.7}
+      }
+    },
+    {
+      "frames": 108,
+      "text": "周末只有两小时",
+      "caption": "如果选了做项目，这 80 元就是你放弃的收益。",
+      "motion": {
+        "layout": "compare",
+        "relation": "或",
+        "beats": [
+          {"label": "去兼职的收入", "type": "metric", "value": 80, "unit": " 元", "at": 0.24},
+          {"label": "做项目", "type": "button", "at": 0.48}
+        ],
+        "focus": {"beat": 0, "at": 0.5}
+      }
+    },
+    {
+      "frames": 112,
+      "text": "机会成本怎么看？",
+      "caption": "比较可行选项，找出你放弃的最佳选择。",
+      "motion": {
+        "layout": "steps",
+        "transition": "slide",
+        "beats": [
+          {"label": "列出可行选项", "at": 0.12},
+          {"label": "选定要做的事", "at": 0.36},
+          {"label": "找出放弃的最佳选择", "at": 0.59}
+        ]
+      }
+    }
   ]
 }
