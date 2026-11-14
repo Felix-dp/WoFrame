@@ -232,11 +232,11 @@ async function main([command, first, second]) {
       if (!first) throw new Error('用法：deliver <成品文件> --track=vertical --series=零基础经济学 --ep=01 --title=机会成本 --ratio=9x16 [--cover]');
       const track = flag('track');
       if (!trackIds.includes(track)) throw new Error('deliver 需要 --track=' + trackIds.join('|'));
-      const series = clean(flag('series'));
+      const series = clean(flag('series')) || (track === 'traffic' ? '泛流量' : '');
       const title = clean(flag('title'));
       const ep = String(flag('ep') ?? '').padStart(2, '0');
       const ratio = flag('ratio') ?? '9x16';
-      if (!series || !title || !/^\d{2,}$/.test(ep)) throw new Error('deliver 需要 --series、--title 和 --ep');
+      if (!series || !title || !/^\d{2,}$/.test(ep)) throw new Error('deliver 需要 --series（泛流量可省略）、--title 和 --ep');
       if (!await exists(first)) throw new Error('找不到成品文件：' + first);
       const target = join(outputRoot, track, series,
         artifactName({title, ep, ratio, cover: has('cover'), ext: extname(first) || '.mp4'}));
