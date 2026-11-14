@@ -50,6 +50,41 @@ function validateCues(cues, frames, steady) {
   }
 }
 
+function validateCollage(scene) {
+  const {collage} = scene;
+  if (collage == null) return;
+  if (typeof collage !== 'object' || Array.isArray(collage)) throw new Error('collage 须为对象');
+  if (scene.video || scene.caption || Object.keys(scene.motion ?? {}).some(key => key !== 'transition')) {
+    throw new Error('纸页拼贴使用独立版式，可配旁白及 motion.transition；画面文字请写入 text 或 collage.note');
+  }
+  if (scene.cues?.some(cue => cue.cards || cue.screenText)) {
+    throw new Error('纸页拼贴的 cues 支持字幕，画面文字请写入 text 或 collage.note');
+  }
+  const lines = scene.text?.split('\n') ?? [];
+  if (!lines.length || lines.length > 3 || lines.some(line => !line.trim() || [...line].length > 16)) {
+    throw new Error('纸页拼贴 text 须为一至三行，每行最多 16 字');
+  }
+  if (Boolean(collage.portrait) === Boolean(collage.illustration)) {
+    throw new Error('纸页拼贴须选择一张主图，填写 collage.portrait 或 collage.illustration');
+  }
+  for (const field of ['cover', collage.illustration ? 'illustration' : 'portrait']) {
+    const name = collage[field];
+    if (typeof name !== 'string' || !/\.(?:png|webp|jpe?g)$/i.test(name)) {
+      throw new Error(`collage.${field} 须填写 PNG、WebP 或 JPEG 图片`);
+    }
+    localAsset(name);
+  }
+  for (const [field, max] of Object.entries({
+    book: 24, author: 24, originalTitle: 46, note: 42, credit: 56, eyebrow: 12, folio: 22,
+  })) {
+    const value = collage[field];
+    if (value == null && field !== 'book' && field !== 'author') continue;
+    if (typeof value !== 'string' || !value.trim() || /[\r\n]/.test(value) || [...value].length > max) {
+      throw new Error(`collage.${field} 须为非空单行文字，最多 ${max} 字`);
+    }
+  }
+}
+
 export function validateEpisode(project) {
   const {title, route, scenes, bgm, fps = 30} = project;
   const ratio = project.ratio ?? project.preferences?.ratio ?? '9:16';
@@ -63,6 +98,9 @@ export function validateEpisode(project) {
   if (project.preferences?.pipShape != null && !pipShapes.includes(project.preferences.pipShape)) {
     throw new Error('preferences.pipShape 须为 rounded 或 circle');
   }
+  if (project.preferences?.pipSize != null && project.preferences.pipSize !== 'small') {
+    throw new Error('preferences.pipSize 可用 small');
+  }
   if (typeof ratio !== 'string' || !Object.hasOwn(episodeSizes, ratio)) {
     throw new Error(`画幅须为 ${Object.keys(episodeSizes).join('、')}`);
   }
@@ -70,7 +108,9 @@ export function validateEpisode(project) {
     throw new Error('请使用 1–60 的整数 FPS');
   }
   if (!Array.isArray(scenes) || !scenes.length) throw new Error('请添加分镜');
-  if (project.theme != null && (typeof project.theme !== 'string' || !Object.hasOwn(palettes, project.theme))) throw new Error('theme 须为 ink 或 paper');
+  if (project.theme != null && (typeof project.theme !== 'string' || !Object.hasOwn(palettes, project.theme))) {
+    throw new Error('theme 须为 ' + Object.keys(palettes).join('、'));
+  }
   localAsset(bgm);
   let duration = 0;
   scenes.forEach((scene, index) => {
@@ -88,6 +128,15 @@ export function validateEpisode(project) {
         throw new Error('画面文字和字幕须为字符串');
       }
       validateMotion(scene);
+      validateCollage(scene);
+      if (scene.illustration != null) {
+        if (scene.collage || scene.motion?.speaker !== 'pip' || !scene.text?.trim() ||
+            typeof scene.illustration !== 'string' || !/\.(?:jpe?g|png|webp)$/i.test(scene.illustration)) {
+          throw new Error('illustration 须配合小窗和标题，使用 JPEG、PNG 或 WebP');
+        }
+        if (scene.cues?.some(cue => cue.cards)) throw new Error('插图分镜的 cues 支持字幕和标题');
+        localAsset(scene.illustration);
+      }
       localAsset(scene.video);
       localAsset(scene.audio);
       duration += scene.frames;

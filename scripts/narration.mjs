@@ -11,7 +11,7 @@ export const qwenBackend = process.platform === 'darwin' && process.arch === 'ar
 export const hasLocalQwen = Boolean(qwenBackend);
 const qwenRunner = fileURLToPath(new URL('./qwen-narration.py', import.meta.url));
 const qwenLanguages = {'zh-CN': 'Chinese', 'en-US': 'English', 'ja-JP': 'Japanese', 'ko-KR': 'Korean'};
-const localDefaults = {'zh-CN': 'qwen-vivian', 'en-US': 'qwen-ryan', 'ja-JP': 'qwen-ono-anna', 'ko-KR': 'qwen-sohee'};
+const localDefaults = {'en-US': 'qwen-ryan', 'ja-JP': 'qwen-ono-anna', 'ko-KR': 'qwen-sohee'};
 const qwenSetup = 'node scripts/woframe.mjs setup --track=vertical --install';
 const voices = [
   {id: 'qwen-vivian', provider: 'qwen', speaker: 'Vivian', label: 'Vivian · 清亮女声', language: 'zh-CN'},
