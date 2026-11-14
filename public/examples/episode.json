@@ -3,6 +3,8 @@
   "route": "faceless",
   "fps": 30,
   "preferences": {
+    "track": "vertical",
+    "series": "零基础导数",
     "audience": "第一次接触导数的高中生",
     "targetSeconds": 10,
     "pace": "每镜一个概念",

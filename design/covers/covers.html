@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WoFrame · 封面风格样品</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000}
+.stage{position:relative;width:100vw;height:100vh;container-type:size;overflow:hidden;
+  font-family:"PingFang SC","Hiragino Sans GB","Heiti SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.cover{position:absolute;inset:0;display:none}
+.cover.on{display:block}
+.grain{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>")}
+
+/* ---------- A 简 · 色块 ---------- */
+.s-min{background:#0B857B;color:#fff}
+.s-min .tex{position:absolute;inset:0;background:
+  radial-gradient(90% 62% at 50% -6%,rgba(255,255,255,.16),transparent 62%),
+  radial-gradient(70% 55% at 50% 112%,rgba(0,0,0,.28),transparent 62%)}
+.s-min .topline{position:absolute;left:6.2cqw;right:6.2cqw;top:6.4cqh;display:flex;justify-content:space-between;align-items:center;
+  font-size:1.12cqw;letter-spacing:.32em;color:rgba(255,255,255,.82)}
+.s-min .topline b{font-weight:700;letter-spacing:.16em}
+.s-min .hr{position:absolute;left:6.2cqw;right:6.2cqw;top:9.8cqh;height:1px;background:rgba(255,255,255,.3)}
+.s-min .mid{position:absolute;left:0;right:0;top:28cqh;text-align:center}
+.s-min .kick{font-size:1.25cqw;letter-spacing:.6em;color:rgba(255,255,255,.8);text-indent:.6em;margin-bottom:3.6cqh}
+.s-min .t{font-size:11.4cqw;font-weight:800;letter-spacing:.1em;text-indent:.1em;line-height:1.02;text-shadow:0 1.4cqh 3.4cqh rgba(0,0,0,.16)}
+.s-min .hook{margin-top:3.8cqh;font-size:2.3cqw;font-weight:500;letter-spacing:.12em;color:rgba(255,255,255,.92)}
+.s-min .tags{display:flex;justify-content:center;gap:2.2cqw;margin-top:5.2cqh;font-size:1.05cqw;letter-spacing:.24em;color:rgba(255,255,255,.62)}
+.s-min .band{position:absolute;left:0;right:0;bottom:0;height:10.4cqh;background:#06302C;display:flex;align-items:center;justify-content:space-between;
+  padding:0 6.2cqw;font-size:1.22cqw;letter-spacing:.18em;color:rgba(255,255,255,.7)}
+.s-min .tag{position:absolute;top:11.2cqh;right:6.2cqw;transform:rotate(6deg);background:#F3B94C;color:#2A1700;
+  font-weight:800;font-size:1.25cqw;letter-spacing:.2em;padding:1.1cqh 2.1cqw;box-shadow:0 1.2cqh 2.6cqh rgba(0,0,0,.22)}
+
+/* ---------- B 科技 · 霓虹 ---------- */
+.s-tech{background:#05060C;color:#EAF2FF}
+.s-tech .glow{position:absolute;inset:-15%;background:
+  radial-gradient(42% 42% at 79% 16%,rgba(124,58,237,.5),transparent 70%),
+  radial-gradient(38% 38% at 10% 84%,rgba(6,182,212,.32),transparent 72%),
+  radial-gradient(28% 28% at 52% 52%,rgba(59,130,246,.16),transparent 72%)}
+.s-tech .grid{position:absolute;inset:0;background-image:
+  linear-gradient(rgba(125,180,255,.07) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(125,180,255,.07) 1px,transparent 1px);
+  background-size:5.6cqw 5.6cqw;
+  -webkit-mask-image:radial-gradient(ellipse 62% 58% at 58% 46%,#000 26%,transparent 76%);
+  mask-image:radial-gradient(ellipse 62% 58% at 58% 46%,#000 26%,transparent 76%)}
+.s-tech .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 34%,#05060C 96%)}
+.s-tech .ghost{position:absolute;right:1cqw;bottom:-16cqh;font-size:40cqw;font-weight:900;line-height:1;letter-spacing:-.04em;
+  color:#fff;opacity:.03;font-family:"Helvetica Neue",Arial,sans-serif}
+.s-tech .left{position:absolute;left:7.4cqw;top:50%;transform:translateY(-50%);width:56cqw}
+.s-tech .chip{display:inline-flex;align-items:center;gap:1.1cqw;border:1px solid rgba(125,211,252,.32);background:rgba(8,47,73,.34);
+  color:#7DD3FC;font-size:1.1cqw;letter-spacing:.2em;padding:.95cqh 1.5cqw;border-radius:999px}
+.s-tech .chip i{width:.42cqw;height:.42cqw;border-radius:50%;background:#22D3EE;box-shadow:0 0 1.2cqw #22D3EE}
+.s-tech .chip em{font-style:normal;color:#A5B4FC;letter-spacing:.14em;padding-left:1.1cqw;border-left:1px solid rgba(165,180,252,.35)}
+.s-tech .t{margin-top:4.2cqh;font-size:10.2cqw;font-weight:900;letter-spacing:.02em;line-height:1.04}
+.s-tech .t span{color:#F4F8FF;text-shadow:0 0 4cqw rgba(147,197,253,.28)}
+.s-tech .t em{font-style:normal;background:linear-gradient(100deg,#67E8F9 0%,#818CF8 55%,#C084FC 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.s-tech .underline{display:block;width:30cqw;height:2.6cqh;margin-top:1.2cqh;overflow:visible}
+.s-tech .hook{margin-top:3.2cqh;font-size:2.3cqw;font-weight:500;letter-spacing:.07em;color:#B9C6DE}
+.s-tech .chips{display:flex;gap:1.1cqw;margin-top:3.4cqh}
+.s-tech .chips span{font-size:1.08cqw;letter-spacing:.16em;color:#8FA6C6;border:1px solid rgba(143,166,198,.24);
+  padding:.85cqh 1.4cqw;border-radius:8px;background:rgba(255,255,255,.02)}
+
+/* ---------- C 电影 · 学术 ---------- */
+.s-cin{background:#08080A;color:#F2EDE3}
+.s-cin .bg{position:absolute;inset:0;background:
+  radial-gradient(60% 52% at 50% 30%,#1A1A20 0%,#101014 42%,#08080A 78%)}
+.s-cin .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 44%,transparent 42%,rgba(0,0,0,.62) 100%)}
+.s-cin .top{position:absolute;top:6.6cqh;left:7cqw;right:7cqw;display:flex;justify-content:space-between;
+  font-size:1.02cqw;letter-spacing:.44em;color:#8C8475;text-transform:uppercase}
+.s-cin .rule{position:absolute;top:10.2cqh;left:7cqw;right:7cqw;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(120,110,92,.55) 18%,rgba(120,110,92,.55) 82%,transparent)}
+.s-cin .stack{position:absolute;left:0;right:0;top:17.5cqh;text-align:center}
+.s-cin .t{font-family:"Songti SC","STSong","SimSun",serif;font-size:10.8cqw;font-weight:900;letter-spacing:.12em;text-indent:.12em;
+  line-height:1.06;color:#F6F0E2;text-shadow:0 0 6cqw rgba(232,200,122,.16)}
+.s-cin .gold{width:8.4cqw;height:2px;background:linear-gradient(90deg,transparent,#E8C87A,transparent);margin:3.2cqh auto 2.8cqh}
+.s-cin .hook{font-size:1.85cqw;font-weight:400;letter-spacing:.22em;color:#B7AC96;text-indent:.22em}
+.s-cin .fork{position:absolute;left:17cqw;bottom:8.4cqh;height:38cqh;width:66cqw;overflow:visible}
+.s-cin .figure{position:absolute;left:17cqw;width:66cqw;bottom:8.4cqh;height:38cqh;object-fit:contain;
+  filter:drop-shadow(0 0 3cqw rgba(232,200,122,.18))}
+.s-cin .bottom{position:absolute;left:7cqw;right:7cqw;bottom:3.4cqh;display:flex;justify-content:space-between;
+  font-size:.98cqw;letter-spacing:.3em;color:#6F685C}
+
+/* ---------- D 切片 · 分栏 ---------- */
+.s-slice{background:#07100D;color:#F1F5F0}
+.s-slice .top{position:absolute;left:0;right:0;top:0;height:15.5cqh;background:#050B09;display:flex;align-items:center;
+  justify-content:space-between;padding:0 5.4cqw;font-size:1.12cqw;letter-spacing:.26em;color:rgba(241,245,240,.62)}
+.s-slice .top b{color:#F1F5F0;font-weight:700;letter-spacing:.2em}
+.s-slice .still{position:absolute;left:0;right:0;top:15.5cqh;height:61.5cqh;overflow:hidden;background:#0A1512}
+.s-slice .still img{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.s-slice .still .blur{display:none;position:absolute;inset:-10%;background:url("assets/slice-still.jpg") center/cover;filter:blur(2.4cqw) brightness(.42) saturate(.9)}
+.s-slice .still::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(3,9,7,.92),transparent 26%,transparent 74%,rgba(3,9,7,.92))}
+.s-slice .bottom{position:absolute;left:0;right:0;bottom:0;height:23cqh;background:#050B09;display:flex;align-items:center;
+  justify-content:space-between;padding:0 5.4cqw;gap:4cqw}
+.s-slice .t{font-size:6.4cqw;font-weight:900;letter-spacing:.06em;line-height:1;white-space:nowrap}
+.s-slice .t u{text-decoration:none;color:#7BD3B2}
+.s-slice .hook{font-size:1.8cqw;letter-spacing:.1em;color:rgba(241,245,240,.66);text-align:right;max-width:34cqw;line-height:1.5}
+.s-slice .seam{position:absolute;left:0;right:0;top:77cqh;height:1px;background:linear-gradient(90deg,transparent,rgba(123,211,178,.4),transparent)}
+
+/* ---------- E 纸感 · 编辑 ---------- */
+.s-paper{background:#FAF6EC;color:#1C2B23}
+.s-paper .tex{position:absolute;inset:0;background:
+  radial-gradient(80% 60% at 78% 8%,rgba(190,100,64,.07),transparent 62%),
+  radial-gradient(70% 60% at 6% 96%,rgba(47,107,79,.08),transparent 60%)}
+.s-paper .top{position:absolute;top:6.4cqh;left:6.4cqw;right:6.4cqw;display:flex;justify-content:space-between;align-items:baseline;
+  font-size:1.05cqw;letter-spacing:.34em;color:#5B6B60;text-transform:uppercase}
+.s-paper .top b{font-family:"Songti SC",serif;font-size:1.5cqw;letter-spacing:.1em;color:#1C2B23}
+.s-paper .rule{position:absolute;top:10cqh;left:6.4cqw;right:6.4cqw;height:1px;background:#D8D2C2}
+.s-paper .body{position:absolute;left:6.4cqw;right:6.4cqw;top:17.5cqh;display:flex;justify-content:space-between;align-items:flex-end}
+.s-paper .left{width:60cqw}
+.s-paper .kicker{font-size:1.05cqw;letter-spacing:.3em;color:#8C978D;margin-bottom:3.2cqh}
+.s-paper .t{font-family:"Songti SC","STSong",serif;font-size:12.4cqw;font-weight:900;letter-spacing:.08em;line-height:1;color:#16241D}
+.s-paper .hook{margin-top:3.4cqh;font-size:1.95cqw;letter-spacing:.12em;color:#5B6B60}
+.s-paper .tags{display:flex;gap:1.6cqw;margin-top:6cqh}
+.s-paper .tags span{font-family:"Songti SC",serif;font-size:1.12cqw;letter-spacing:.2em;color:#7C8A7F;border:1px solid #D8D2C2;border-radius:999px;padding:.9cqh 1.6cqw;background:rgba(255,255,255,.5)}
+.s-paper .seal{width:20cqw;height:20cqw;border-radius:50%;border:1px solid #C9C2AE;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1cqh;transform:rotate(-7deg);background:rgba(255,255,255,.35);
+  box-shadow:inset 0 0 0 0.55cqw #FAF6EC,inset 0 0 0 calc(.55cqw + 1px) #E2DBC8}
+.s-paper .seal span{font-family:"Songti SC",serif;font-size:5.4cqw;font-weight:900;line-height:1;color:#BE6440}
+.s-paper .seal i{font-style:normal;font-size:1.05cqw;letter-spacing:.4em;color:#8C978D;text-indent:.4em}
+.s-paper .bignum{position:absolute;left:1.4cqw;bottom:-13cqh;font-family:"Songti SC",serif;font-weight:900;
+  font-size:27cqw;line-height:1;color:rgba(28,43,35,.04);letter-spacing:-.02em}
+.s-paper .foot{position:absolute;left:6.4cqw;right:6.4cqw;bottom:5.4cqh;display:flex;justify-content:space-between;
+  align-items:center;font-size:1.02cqw;letter-spacing:.24em;color:#8C978D;border-top:1px solid #D8D2C2;padding-top:2.6cqh}
+
+/* ---------- 3:4 适配：同一套 DNA，重排不重画 ---------- */
+[data-format="3x4"] .s-min .mid{top:22cqh}
+[data-format="3x4"] .s-min .t{font-size:16cqw}
+[data-format="3x4"] .s-min .kick{font-size:1.75cqw;margin-bottom:3cqh}
+[data-format="3x4"] .s-min .hook{font-size:3.4cqw;margin-top:3.2cqh}
+[data-format="3x4"] .s-min .tags{font-size:1.5cqw;margin-top:6.4cqh;gap:2.6cqw}
+[data-format="3x4"] .s-min .topline{font-size:1.6cqw}
+[data-format="3x4"] .s-min .band{height:7.6cqh;font-size:1.7cqw}
+[data-format="3x4"] .s-min .tag{font-size:1.7cqw;top:9.4cqh;padding:1.3cqh 2.6cqw}
+
+[data-format="3x4"] .s-tech .left{left:8cqw;width:82cqw;top:45%}
+[data-format="3x4"] .s-tech .chip{font-size:1.65cqw;padding:1.4cqh 2.2cqw}
+[data-format="3x4"] .s-tech .t{font-size:13.6cqw;margin-top:3.4cqh}
+[data-format="3x4"] .s-tech .underline{width:46cqw;height:3cqh;margin-top:1.6cqh}
+[data-format="3x4"] .s-tech .hook{font-size:3.1cqw;margin-top:3.4cqh}
+[data-format="3x4"] .s-tech .chips span{font-size:1.6cqw;padding:1.2cqh 2cqw}
+[data-format="3x4"] .s-tech .ghost{font-size:40cqw;right:-3cqw;bottom:-4cqh;opacity:.026}
+[data-format="3x4"] .s-tech .grid{background-size:12cqw 12cqw}
+
+[data-format="3x4"] .s-cin .top{font-size:1.5cqw}
+[data-format="3x4"] .s-cin .stack{top:15.5cqh}
+[data-format="3x4"] .s-cin .t{font-size:15cqw}
+[data-format="3x4"] .s-cin .hook{font-size:2.6cqw;margin-top:0}
+[data-format="3x4"] .s-cin .gold{width:14cqw;margin:3cqh auto 2.6cqh}
+[data-format="3x4"] .s-cin .fork,[data-format="3x4"] .s-cin .figure{left:9cqw;width:82cqw;height:26cqh;bottom:13cqh}
+[data-format="3x4"] .s-cin .bottom{font-size:1.4cqw}
+
+[data-format="3x4"] .s-slice .top{height:9cqh;font-size:1.6cqw}
+[data-format="3x4"] .s-slice .still{top:9cqh;height:48cqh}
+[data-format="3x4"] .s-slice .still .blur{display:block}
+[data-format="3x4"] .s-slice .still img{object-fit:contain;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 7%,#000 93%,transparent)}
+[data-format="3x4"] .s-slice .still::after{display:none}
+[data-format="3x4"] .s-slice .seam{top:57cqh}
+[data-format="3x4"] .s-slice .bottom{height:43cqh;flex-direction:column;justify-content:center;align-items:flex-start;gap:2.6cqh}
+[data-format="3x4"] .s-slice .t{font-size:13cqw}
+[data-format="3x4"] .s-slice .hook{font-size:2.8cqw;text-align:left;max-width:none;letter-spacing:.12em}
+
+[data-format="3x4"] .s-paper .top{font-size:1.5cqw}
+[data-format="3x4"] .s-paper .top b{font-size:2cqw}
+[data-format="3x4"] .s-paper .body{top:18.5cqh}
+[data-format="3x4"] .s-paper .left{width:63cqw;flex:none}
+[data-format="3x4"] .s-paper .kicker{font-size:1.6cqw;margin-bottom:2.8cqh}
+[data-format="3x4"] .s-paper .t{font-size:15cqw;letter-spacing:.02em}
+[data-format="3x4"] .s-paper .hook{font-size:2.9cqw;margin-top:3cqh}
+[data-format="3x4"] .s-paper .tags{margin-top:5cqh;gap:2cqw}
+[data-format="3x4"] .s-paper .tags span{font-size:1.7cqw}
+[data-format="3x4"] .s-paper .seal{width:22cqw;height:22cqw;margin-bottom:9cqh;flex:none}
+[data-format="3x4"] .s-paper .seal span{font-size:6.6cqw}
+[data-format="3x4"] .s-paper .seal i{font-size:1.5cqw}
+[data-format="3x4"] .s-paper .foot{font-size:1.5cqw}
+[data-format="3x4"] .s-paper .bignum{font-size:30cqw;bottom:2cqh;opacity:.7}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- A -->
+  <section class="cover s-min" data-style="min">
+    <div class="tex"></div>
+    <div class="topline"><span data-slot="series">零基础经济学</span><span>第 <b data-slot="ep">01</b> 集</span></div>
+    <div class="hr"></div>
+    <div class="mid">
+      <div class="kick">3 分钟讲清一个概念</div>
+      <div class="t" data-slot="title">机会成本</div>
+      <div class="hook" data-slot="hook">你放弃的，才是最贵的</div>
+      <div class="tags"><span>选择</span><span>·</span><span>代价</span><span>·</span><span>决策</span></div>
+    </div>
+    <div class="tag">零基础</div>
+    <div class="band"><span data-slot="sub">经济学原理 · 第一讲</span><span>每周更新</span></div>
+    <div class="grain"></div>
+  </section>
+
+  <!-- B -->
+  <section class="cover s-tech" data-style="tech">
+    <div class="glow"></div><div class="grid"></div><div class="vig"></div>
+    <div class="ghost" data-slot="ep">01</div>
+    <div class="left">
+      <div class="chip"><i></i><span data-slot="series">零基础经济学</span><em>EP.<b data-slot="ep">01</b></em></div>
+      <div class="t"><span data-slot="titleA">机会</span><em data-slot="titleB">成本</em></div>
+      <svg class="underline" viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="ug" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs>
+        <path d="M5 18 C110 5 200 24 300 13 C392 4 500 20 595 8" fill="none" stroke="url(#ug)" stroke-width="4.5" stroke-linecap="round"/>
+      </svg>
+      <div class="hook" data-slot="hook">你放弃的，才是最贵的</div>
+      <div class="chips"><span data-slot="k1">选择</span><span data-slot="k2">代价</span><span data-slot="k3">决策</span></div>
+    </div>
+    <div class="grain"></div>
+  </section>
+
+  <!-- C -->
+  <section class="cover s-cin" data-style="cinema">
+    <div class="bg"></div><div class="vig"></div>
+    <div class="top"><span>EP.<b data-slot="ep">01</b></span><span data-slot="series">零基础经济学</span></div>
+    <div class="rule"></div>
+    <div class="stack">
+      <div class="t" data-slot="title">机会成本</div>
+      <div class="gold"></div>
+      <div class="hook" data-slot="hook">你放弃的，才是最贵的</div>
+    </div>
+    <svg class="fork" viewBox="0 0 1000 430" aria-hidden="true">
+      <defs>
+        <linearGradient id="fg" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#8A6F35"/><stop offset=".55" stop-color="#E8C87A"/><stop offset="1" stop-color="#FFF0C8"/></linearGradient>
+        <filter id="gl" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <path d="M500 400 L500 268" stroke="url(#fg)" stroke-width="5" fill="none" stroke-linecap="round" opacity=".95"/>
+      <path d="M500 268 C472 205 372 168 218 62" stroke="url(#fg)" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#gl)"/>
+      <path d="M500 268 C528 205 628 168 782 62" stroke="#4A443A" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="2 16"/>
+      <circle cx="212" cy="58" r="8" fill="#FFF0C8"/>
+      <circle cx="788" cy="58" r="7" fill="none" stroke="#6D6558" stroke-width="3"/>
+      <text x="212" y="34" text-anchor="middle" fill="#E8C87A" font-size="30" letter-spacing="6" font-family="PingFang SC, sans-serif">看电影</text>
+      <text x="788" y="34" text-anchor="middle" fill="#6D6558" font-size="30" letter-spacing="6" font-family="PingFang SC, sans-serif">兼职</text>
+    </svg>
+    <div class="bottom"><span data-slot="sub">经济学原理 · 第一讲</span><span data-slot="note">你放弃的那个选项，就是代价</span></div>
+    <div class="grain"></div>
+  </section>
+
+  <!-- D -->
+  <section class="cover s-slice" data-style="slice">
+    <div class="top"><span><b data-slot="series">零基础经济学</b></span><span>EP.<b data-slot="ep">01</b> · 经济学原理</span></div>
+    <div class="still"><div class="blur"></div><img src="assets/slice-still.jpg" alt=""></div>
+    <div class="seam"></div>
+    <div class="bottom">
+      <div class="t"><u>机会</u>成本</div>
+      <div class="hook" data-slot="hook">你放弃的，才是最贵的</div>
+    </div>
+  </section>
+
+  <!-- E -->
+  <section class="cover s-paper" data-style="paper">
+    <div class="tex"></div>
+    <div class="bignum" data-slot="ep">01</div>
+    <div class="top"><span data-slot="series">零基础经济学</span><span>NO.<b data-slot="ep">01</b></span></div>
+    <div class="rule"></div>
+    <div class="body">
+      <div class="left">
+        <div class="kicker">经济学原理 · 第一讲</div>
+        <div class="t" data-slot="title">机会成本</div>
+        <div class="hook" data-slot="hook">你放弃的，才是最贵的</div>
+        <div class="tags"><span>选择</span><span>代价</span><span>决策</span></div>
+      </div>
+      <div class="seal"><span data-slot="ep">01</span><i>机会成本</i></div>
+    </div>
+    <div class="foot"><span>每集 3 分钟，讲清一个概念</span><span>零基础 · 经济学</span></div>
+    <div class="grain"></div>
+  </section>
+
+</div>
+<script>
+const Q = new URLSearchParams(location.search);
+const D = Object.assign({
+  series:"零基础经济学", ep:"01", title:"机会成本",
+  hook:"你放弃的，才是最贵的", k1:"选择", k2:"代价", k3:"决策",
+  sub:"经济学原理 · 第一讲"
+}, Object.fromEntries([...Q].filter(([k])=>k!=="style" && k!=="format")));
+const style = Q.get("style") || "min";
+D.titleA = D.title.slice(0, Math.ceil(D.title.length/2) * 2 === D.title.length ? D.title.length/2 : Math.ceil(D.title.length/2));
+D.titleB = D.title.slice(D.titleA.length);
+const cover = document.querySelector('[data-style="'+style+'"]');
+if (cover) {
+  cover.classList.add("on");
+  cover.querySelectorAll("[data-slot]").forEach(el => {
+    const v = D[el.dataset.slot];
+    if (v != null && v !== "") el.textContent = v;
+  });
+}
+const figure = Q.get("figure");
+if (figure && cover) {
+  const fork = cover.querySelector(".fork");
+  if (fork) { const img = new Image(); img.src = figure; img.className = "figure"; fork.replaceWith(img); }
+}
+const still = Q.get("still");
+if (still && cover) {
+  cover.querySelectorAll(".still img, .still .blur").forEach(el => {
+    if (el.tagName === "IMG") el.src = still;
+    else el.style.backgroundImage = "url(\"" + still + "\")";
+  });
+}
+const fmt = Q.get("format") || "16x9";
+const size = { "16x9":[1920,1080], "3x4":[1080,1440], "1x1":[1080,1080], "4x3":[1440,1080] }[fmt];
+if (size) { document.getElementById("stage").style.width = size[0]+"px"; document.getElementById("stage").style.height = size[1]+"px"; }
+document.body.setAttribute("data-format", fmt);
+document.documentElement.setAttribute("data-ready","1");
+</script>
+</body>
+</html>

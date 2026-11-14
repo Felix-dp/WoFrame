@@ -1,0 +1,46 @@
+# WoFrame 运行依赖清单（唯一来源）
+# 检查环境：node scripts/woframe.mjs setup
+# 自动安装：node scripts/woframe.mjs setup --install
+# 说明文档见 docs/environment.md
+
+version: 1
+node: ">=22.12"
+
+npm:
+  install: true
+
+checks:
+  - id: ffmpeg
+    why: 视频编码、封面与成片处理
+    command: ffmpeg -version
+    required: true
+    darwin: brew install ffmpeg
+    windows: winget install --id Gyan.FFmpeg -e
+    linux: sudo apt install ffmpeg
+  - id: ffprobe
+    why: 读取音频真实时长，供 fit 与 check 对齐
+    command: ffprobe -version
+    required: true
+    darwin: brew install ffmpeg
+    windows: winget install --id Gyan.FFmpeg -e
+    linux: sudo apt install ffmpeg
+  - id: chrome
+    why: 渲染成片与封面出图，首次也可由 Remotion 自动下载 Headless Shell
+    required: false
+    darwin: brew install --cask google-chrome
+    windows: winget install --id Google.Chrome -e
+    linux: sudo apt install google-chrome-stable
+  - id: uv
+    why: 配音工具链，不露脸支路后续启用
+    command: uv --version
+    required: false
+    darwin: brew install uv
+    windows: winget install --id astral-sh.uv -e
+    linux: curl -LsSf https://astral.sh/uv/install.sh | sh
+  - id: edge-tts
+    why: 离线配音，不露脸支路后续启用
+    command: edge-tts --help
+    required: false
+    darwin: uv tool install edge-tts
+    windows: uv tool install edge-tts
+    linux: uv tool install edge-tts

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>封面风格样品 · WoFrame</title>
+<style>
+  :root{
+    --paper:#FBF8F1; --surface:#fff; --ink:#1C2B23; --ink-2:#5B6B60; --ink-3:#8C978D;
+    --line:#E4E8DC; --brand:#2F6B4F; --accent:#BE6440; --gold:#E8C87A;
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    --serif:"Songti SC","STSong",serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);
+    background-image:radial-gradient(900px 420px at 85% -10%,rgba(190,100,64,.06),transparent 60%),
+      radial-gradient(700px 380px at 0% 10%,rgba(47,107,79,.07),transparent 60%);}
+  .wrap{max-width:1180px;margin:0 auto;padding:54px 28px 120px}
+  .eyebrow{font-size:12px;letter-spacing:.34em;color:var(--ink-3);text-transform:uppercase}
+  h1{font-family:var(--serif);font-weight:900;font-size:42px;margin:14px 0 12px;letter-spacing:.04em}
+  .lede{font-size:15.5px;line-height:1.85;color:var(--ink-2);max-width:760px}
+  .lede b{color:var(--ink);font-weight:600}
+  .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:26px 0 30px;border-top:1px solid var(--line);padding-top:18px}
+  .hint{font-size:12.5px;color:var(--ink-3);letter-spacing:.02em}
+  button.toggle{margin-left:auto;font:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+  button.toggle[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(28,43,35,.04),0 18px 40px -30px rgba(28,43,35,.35);
+    transition:transform .2s ease,box-shadow .2s ease,border-color .2s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 1px 2px rgba(28,43,35,.05),0 26px 50px -30px rgba(28,43,35,.45)}
+  .card[data-picked="1"]{border-color:var(--brand);box-shadow:0 0 0 2px rgba(47,107,79,.18),0 24px 48px -30px rgba(47,107,79,.5)}
+  .shots{position:relative;display:flex;gap:2px;background:#0d0f12;height:236px}
+  .shots img{display:block;height:100%;object-fit:cover}
+  .shots img:first-child{flex:1;min-width:0}
+  .shots .v{width:auto;flex:none}
+  .head{display:flex;align-items:baseline;gap:10px;padding:16px 18px 0}
+  .no{font-family:var(--serif);font-size:22px;color:var(--accent);font-weight:900;line-height:1}
+  .name{font-size:16.5px;font-weight:600;letter-spacing:.02em}
+  .tag{font-size:12.5px;color:var(--ink-3);margin-left:auto}
+  .say{padding:8px 18px 0;font-size:13.5px;color:var(--ink-2);line-height:1.7}
+  dl{margin:12px 0 0;padding:0 18px 16px;display:grid;grid-template-columns:52px 1fr;gap:6px 10px;font-size:12.5px;line-height:1.65}
+  dt{color:var(--ink-3);letter-spacing:.06em}
+  dd{margin:0;color:var(--ink-2)}
+  dd.risk{color:#8a5a42}
+  .pick{margin:0 18px 18px;width:calc(100% - 36px);font:inherit;font-size:13.5px;padding:10px;border-radius:10px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;letter-spacing:.08em}
+  .pick:hover{border-color:var(--brand);color:var(--brand)}
+  .card[data-picked="1"] .pick{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .foot{position:fixed;left:0;right:0;bottom:0;background:rgba(251,248,241,.94);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);padding:12px 28px;display:flex;gap:16px;align-items:center;justify-content:center;
+    font-size:13px;color:var(--ink-2)}
+  .foot code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#fff;border:1px solid var(--line);
+    border-radius:6px;padding:3px 8px;color:var(--ink)}
+  .foot b{color:var(--ink);font-weight:600}
+  .thumbs .shots{height:120px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">WoFrame · Cover styles</div>
+  <h1>封面风格样品</h1>
+  <p class="lede">同一集、同一段文字、同一个画幅，只换风格。<b>先定这一张，后面所有集都按它排。</b>
+  下面是五个方向，每个方向都已经写成模板：固定的位置固定，每集只换标题、钩子和图。选一个，之后就不该再换骨架。</p>
+
+  <div class="bar">
+    <span class="hint">点击卡片底部按钮选定；用「缩略图检查」按手机信息流的尺寸再看一遍。</span>
+    <button class="toggle" id="t" aria-pressed="false">缩略图检查</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <article class="card" data-id="min" data-name="简·色块">
+      <div class="shots"><img src="samples/min-16x9.png" alt="简·色块 16:9"><img class="v" src="samples/min-3x4.png" alt="简·色块 3:4"></div>
+      <div class="head"><span class="no">A</span><span class="name">简 · 色块</span><span class="tag">最省事</span></div>
+      <p class="say">一整块颜色、四五个字、一个角标。所有信息都在字上，不依赖任何素材。</p>
+      <dl>
+        <dt>成本</dt><dd>低，纯排版，一集 3 分钟</dd>
+        <dt>适合</dt><dd>概念讲解、清单、口播；周更以上</dd>
+        <dt>风险</dt><dd class="risk">密度低，全靠标题选得准；整季颜色定错会一直偏</dd>
+      </dl>
+      <button class="pick">选这个</button>
+    </article>
+
+    <article class="card" data-id="tech" data-name="科技·霓虹">
+      <div class="shots"><img src="samples/tech-16x9.png" alt="科技·霓虹 16:9"><img class="v" src="samples/tech-3x4.png" alt="科技·霓虹 3:4"></div>
+      <div class="head"><span class="no">B</span><span class="name">科技 · 霓虹</span><span class="tag">最抓眼</span></div>
+      <p class="say">深色底 + 渐变光 + 一个大字标题，关键词换色，下面一行钩子。信息流里最先被看到。</p>
+      <dl>
+        <dt>成本</dt><dd>中，背景是固定预设，标题逐集微调</dd>
+        <dt>适合</dt><dd>工具、技术、效率、AI；深色信息流</dd>
+        <dt>风险</dt><dd class="risk">同质化严重；浅色平台（小红书）偏吃亏</dd>
+      </dl>
+      <button class="pick">选这个</button>
+    </article>
+
+    <article class="card" data-id="cinema" data-name="电影·学术">
+      <div class="shots"><img src="samples/cinema-16x9.png" alt="电影·学术 16:9"><img class="v" src="samples/cinema-3x4.png" alt="电影·学术 3:4"></div>
+      <div class="head"><span class="no">C</span><span class="name">电影 · 学术</span><span class="tag">最有质感</span></div>
+      <p class="say">黑场 + 宋体大字 + 一张每集不同的概念图。像纪录片海报，收藏感最强。</p>
+      <dl>
+        <dt>成本</dt><dd>高，每集要画一张看得懂的核心图</dd>
+        <dt>适合</dt><dd>数学、物理、经济、认知类；B 站 / YouTube</dd>
+        <dt>风险</dt><dd class="risk">图画不好就变装饰；周期长，不适合日更</dd>
+      </dl>
+      <button class="pick">选这个</button>
+    </article>
+
+    <article class="card" data-id="slice" data-name="切片·信息条">
+      <div class="shots"><img src="samples/slice-16x9.png" alt="切片·信息条 16:9"><img class="v" src="samples/slice-3x4.png" alt="切片·信息条 3:4"></div>
+      <div class="head"><span class="no">D</span><span class="name">切片 · 信息条</span><span class="tag">最省时间</span></div>
+      <p class="say">直接取成片里的一帧，上下加两条固定信息条。人在画面里、画面本身够清楚时最划算。</p>
+      <dl>
+        <dt>成本</dt><dd>最低，选帧 + 换字</dd>
+        <dt>适合</dt><dd>口播、访谈、有真人或强画面的内容；日更</dd>
+        <dt>风险</dt><dd class="risk">画面自带大字会打架；每集光线构图不同，一致性最弱</dd>
+      </dl>
+      <button class="pick">选这个</button>
+    </article>
+
+    <article class="card" data-id="paper" data-name="纸感·编辑">
+      <div class="shots"><img src="samples/paper-16x9.png" alt="纸感·编辑 16:9"><img class="v" src="samples/paper-3x4.png" alt="纸感·编辑 3:4"></div>
+      <div class="head"><span class="no">E</span><span class="name">纸感 · 编辑</span><span class="tag">最不像博主</span></div>
+      <p class="say">米白纸面 + 宋体标题 + 一枚集数印章。在一排深色封面里反而显眼，像一本小册子。</p>
+      <dl>
+        <dt>成本</dt><dd>中低，纯排版加一枚章</dd>
+        <dt>适合</dt><dd>知识、读书、经济学、生活思考</dd>
+        <dt>风险</dt><dd class="risk">偏安静，点击率不如高对比；浅底要防裁切压字</dd>
+      </dl>
+      <button class="pick">选这个</button>
+    </article>
+    <article class="card" style="border-style:dashed;background:rgba(255,255,255,.55)">
+      <div class="head" style="padding-top:20px"><span class="no">?</span><span class="name">怎么选</span><span class="tag">三个问题</span></div>
+      <p class="say">不用凭感觉。按顺序答三个问题，基本只剩一个方向。</p>
+      <dl style="grid-template-columns:auto 1fr;gap:10px 14px">
+        <dt>1</dt><dd>每集都能稳定产出「一张看得懂的画面」吗？<br>不能 → <b>A 简·色块</b> 或 <b>E 纸感·编辑</b>；能 → 继续。</dd>
+        <dt>2</dt><dd>主要发在深色信息流（抖音/视频号）还是浅色（小红书/公众号）？<br>深色 → <b>B 科技·霓虹</b>；浅色 → <b>E 纸感·编辑</b>。</dd>
+        <dt>3</dt><dd>每集有人出镜、画面本身就够清楚吗？<br>是 → <b>D 切片·信息条</b>；否 → <b>C 电影·学术</b>。</dd>
+      </dl>
+      <p class="say" style="padding-bottom:18px;color:var(--ink)">如果是零基础、要连更、画面靠图解：先按 <b>C</b> 做第一张，撑不住再退 <b>A</b>。</p>
+    </article>
+  </div>
+</div>
+
+<div class="foot" id="foot">
+  <span>还没选。选定后把 <code>coverStyle</code> 写进系列 Handbook，第二集起自动沿用。</span>
+</div>
+
+<script>
+const foot = document.getElementById('foot');
+const grid = document.getElementById('grid');
+let picked = null;
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('.pick');
+  if (!btn) return;
+  const card = btn.closest('.card');
+  const id = card.dataset.id;
+  if (picked === id) { picked = null; card.removeAttribute('data-picked'); btn.textContent = '选这个'; render(); return; }
+  picked = id;
+  grid.querySelectorAll('.card').forEach(c => { c.removeAttribute('data-picked'); c.querySelector('.pick').textContent = '选这个'; });
+  card.setAttribute('data-picked', '1');
+  btn.textContent = '已选';
+  render();
+});
+function render() {
+  if (!picked) { foot.innerHTML = '<span>还没选。选定后把 <code>coverStyle</code> 写进系列 Handbook，第二集起自动沿用。</span>'; return; }
+  const card = grid.querySelector('[data-id="' + picked + '"]');
+  foot.innerHTML = '<span>已选 <b>' + card.dataset.name + '</b>　→　<code>coverStyle: "' + picked + '"</code>　写进 Handbook 后，后续集只换字和图</span>';
+}
+document.getElementById('t').addEventListener('click', e => {
+  const on = e.currentTarget.getAttribute('aria-pressed') === 'true';
+  e.currentTarget.setAttribute('aria-pressed', String(!on));
+  grid.classList.toggle('thumbs', !on);
+});
+</script>
+</body>
+</html>
