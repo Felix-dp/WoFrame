@@ -1,5 +1,6 @@
 {
   "name": "woframe",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "engines": {
