@@ -13,189 +13,170 @@
       "audio": "narration.wav",
       "cues": [
         {
-          "screenText": "绩点差一点",
-          "cards": [
-            "课程分"
-          ],
           "text": "绩点差一点，",
-          "frame": 0
+          "frame": 0,
+          "screenText": "两人的课程分",
+          "cards": [
+            null,
+            null,
+            null
+          ]
         },
         {
-          "screenText": "竞赛能补回来吗？",
-          "cards": [
-            "课程分",
-            "＋竞赛加分"
-          ],
           "text": "竞赛加分能补回来吗？",
           "frame": 60
         },
         {
-          "screenText": "统一计分口径",
-          "cards": [
-            "课程部分",
-            "加分部分",
-            "综合成绩"
-          ],
           "text": "先把分换到同一套计算口径。",
           "frame": 136
         },
         {
-          "screenText": "两人的课程分",
-          "cards": [
-            "同学 A",
-            "同学 B"
-          ],
           "text": "假设换算后的课程部分，",
           "frame": 238
         },
         {
-          "screenText": "A 的课程分",
-          "cards": [
-            "A 93.2"
-          ],
           "text": "A 是93.2。",
           "frame": 321,
-          "emphasis": "93.2"
+          "emphasis": "93.2",
+          "cards": [
+            "A · 93.2",
+            null,
+            null
+          ]
         },
         {
-          "screenText": "B 的课程分",
-          "cards": [
-            "A 93.2",
-            "B 92.6"
-          ],
           "text": "B 是92.6。",
           "frame": 387,
-          "emphasis": "92.6"
+          "emphasis": "92.6",
+          "cards": [
+            "A · 93.2",
+            "B · 92.6",
+            null
+          ]
         },
         {
-          "screenText": "课程分差",
-          "cards": [
-            "A 93.2",
-            "B 92.6",
-            "相差 0.6"
-          ],
           "text": "两人差0.6分。",
           "frame": 453,
-          "emphasis": "0.6"
+          "emphasis": "0.6",
+          "cards": [
+            "A · 93.2",
+            "B · 92.6",
+            "相差 0.6 分"
+          ]
         },
         {
-          "screenText": "假设 A 没有加分",
-          "cards": [
-            "A 93.2",
-            "＋0"
-          ],
           "text": "假设 A 不加分。",
-          "frame": 520
+          "frame": 520,
+          "cards": [
+            "A · 93.2",
+            null,
+            null
+          ],
+          "screenText": "竞赛加分怎么算"
         },
         {
-          "screenText": "B 的竞赛奖计入",
-          "cards": [
-            "B 92.6",
-            "＋0.8"
-          ],
           "text": "B 的奖项可以加0.8分。",
           "frame": 581,
-          "emphasis": "0.8"
+          "emphasis": "0.8",
+          "cards": [
+            "A · 93.2",
+            "B · 92.6 + 0.8",
+            null
+          ]
         },
         {
-          "screenText": "计算 B 的总分",
-          "cards": [
-            "92.6",
-            "＋0.8",
-            "＝93.4"
-          ],
           "text": "B 的总分是93.4。",
           "frame": 669,
-          "emphasis": "93.4"
+          "emphasis": "93.4",
+          "cards": [
+            "A · 93.2",
+            "B · 93.4",
+            null
+          ]
         },
         {
-          "screenText": "B 反超 A",
-          "cards": [
-            "B 93.4",
-            "A 93.2",
-            "领先 0.2"
-          ],
           "text": "B 领先0.2分。",
           "frame": 751,
-          "emphasis": "0.2"
+          "emphasis": "0.2",
+          "cards": [
+            "A · 93.2",
+            "B · 93.4",
+            "B 领先 0.2 分"
+          ]
         },
         {
-          "screenText": "加分封顶",
-          "cards": [
-            "＋0.8 →",
-            "＋0.4"
-          ],
           "text": "如果加分封顶0.4。",
           "frame": 817,
-          "emphasis": "0.4"
+          "emphasis": "0.4",
+          "cards": [
+            "A · 93.2",
+            "B · 92.6 + 0.4",
+            null
+          ]
         },
         {
-          "screenText": "重算 B 的总分",
-          "cards": [
-            "92.6",
-            "＋0.4",
-            "＝93.0"
-          ],
           "text": "B 的总分就是93.0。",
           "frame": 896,
-          "emphasis": "93.0"
+          "emphasis": "93.0",
+          "cards": [
+            "A · 93.2",
+            "B · 93.0",
+            null
+          ]
         },
         {
-          "screenText": "再比较一次",
-          "cards": [
-            "A 93.2",
-            "B 93.0"
-          ],
           "text": "B 仍然差",
           "frame": 972
         },
         {
-          "screenText": "B 仍然落后",
-          "cards": [
-            "A 93.2",
-            "B 93.0",
-            "还差 0.2 分"
-          ],
           "text": "B 仍然差 0.2 分。",
           "frame": 1021,
-          "emphasis": "0.2"
+          "emphasis": "0.2",
+          "cards": [
+            "A · 93.2",
+            "B · 93.0",
+            "B 还差 0.2 分"
+          ]
         },
         {
-          "screenText": "查本届推免细则",
-          "cards": [
-            "本学院、本届"
-          ],
           "text": "打开自己学院的推免细则。",
-          "frame": 1069
-        },
-        {
-          "screenText": "查本届推免细则",
+          "frame": 1069,
           "cards": [
-            "哪些课计入"
+            null,
+            null,
+            null
           ],
-          "text": "先看哪些课计入。",
-          "frame": 1159
+          "screenText": "查本届推免细则"
         },
         {
-          "screenText": "查本届推免细则",
+          "text": "先看哪些课计入。",
+          "frame": 1159,
           "cards": [
             "哪些课计入",
-            "哪些奖认定"
-          ],
-          "text": "再看哪些奖认定。",
-          "frame": 1229
+            null,
+            null
+          ]
         },
         {
-          "screenText": "查本届推免细则",
+          "text": "再看哪些奖认定。",
+          "frame": 1229,
+          "cards": [
+            "哪些课计入",
+            "哪些奖认定",
+            null
+          ]
+        },
+        {
+          "text": "最后核对权重和上限。",
+          "frame": 1297,
           "cards": [
             "哪些课计入",
             "哪些奖认定",
             "权重和上限"
-          ],
-          "text": "最后核对权重和上限。",
-          "frame": 1297
+          ]
         }
-      ]
+      ],
+      "cueStyle": "steady"
     }
   ]
 }

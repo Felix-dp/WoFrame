@@ -23,7 +23,7 @@ function localAsset(value) {
   }
 }
 
-function validateCues(cues, frames) {
+function validateCues(cues, frames, steady) {
   if (cues === undefined) return;
   if (!Array.isArray(cues) || cues.length === 0) throw new Error('cues 须为非空数组');
   let previous = -1;
@@ -40,7 +40,8 @@ function validateCues(cues, frames) {
       throw new Error('标注的 screenText 须为非空文字');
     }
     if (cue.cards !== undefined && (!Array.isArray(cue.cards) || cue.cards.length < 1 || cue.cards.length > 4 ||
-        cue.cards.some(card => typeof card !== 'string' || !card.trim() || card.length > 64))) {
+        cue.cards.some(card => !(steady && card === null) &&
+          (typeof card !== 'string' || !card.trim() || card.length > 64)))) {
       throw new Error('标注的 cards 须为 1–4 项短文字');
     }
     previous = cue.frame;
@@ -69,7 +70,8 @@ export function validateEpisode(project) {
   scenes.forEach((scene, index) => {
     try {
       if (!Number.isInteger(scene?.frames) || scene.frames < 1) throw new Error('帧数必须是正整数');
-      validateCues(scene.cues, scene.frames);
+      if (scene.cueStyle !== undefined && scene.cueStyle !== 'steady') throw new Error('未知标注样式');
+      validateCues(scene.cues, scene.frames, scene.cueStyle === 'steady');
       if (route === 'talking-head' && !scene.video) throw new Error('缺少口播视频');
       if ([scene.text, scene.caption].some(value => value != null && typeof value !== 'string')) {
         throw new Error('画面文字和字幕须为字符串');
