@@ -1,0 +1,17 @@
+{
+  "title": "速度表在测什么？",
+  "route": "faceless",
+  "fps": 30,
+  "preferences": {
+    "audience": "第一次接触导数的高中生",
+    "targetSeconds": 10,
+    "pace": "每镜一个概念",
+    "platform": "短视频",
+    "ratio": "9:16",
+    "visualStyle": "深色图解"
+  },
+  "scenes": [
+    {"frames": 150, "text": "速度表在测什么？", "caption": "速度表显示的是当下的速度。"},
+    {"frames": 150, "text": "把测量时间缩短", "caption": "观察的时间越短，平均速度越接近此刻的速度。"}
+  ]
+}

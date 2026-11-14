@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>woFrame · 开始</title>
+<link rel="stylesheet" href="theme.css">
+<style>
+body{background:var(--paper)}
+.topbar{background:transparent;border-bottom-color:rgba(228,232,220,.65)}
+
+/* 品牌 */
+.mark{width:30px;height:30px;border-radius:9px;background:var(--brand);color:#fff;
+  display:grid;place-items:center;font:400 15px/1 var(--font-display);position:relative}
+.mark:after{content:"";position:absolute;right:5px;bottom:5px;width:4px;height:4px;
+  border-radius:1px;background:rgba(255,255,255,.65)}
+.brand{font-size:18px;letter-spacing:-.01em;font-weight:400}
+.brand b{font-weight:800;letter-spacing:-.02em}
+
+/* 背景点阵 */
+#dots{position:absolute;inset:0;z-index:0;pointer-events:none}
+
+/* 背景柔光与词云 */
+.glow{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(520px 260px at 12% 22%,rgba(47,107,79,.10),transparent 70%),
+    radial-gradient(460px 220px at 68% 8%,rgba(190,100,64,.09),transparent 72%),
+    radial-gradient(600px 300px at 92% 46%,rgba(198,178,120,.12),transparent 72%)}
+.wc{position:absolute;right:16px;top:58px;width:768px;height:322px;z-index:3;pointer-events:none}
+.wc button{position:absolute;left:0;top:0;padding:2px 5px;border:0;background:none;cursor:help;
+  pointer-events:auto;font-family:var(--font-display);color:var(--ink-3);white-space:nowrap;
+  will-change:transform,color;transition:color .22s ease}
+.wc button span{display:inline-block;animation:word-breathe 9s ease-in-out infinite;
+  animation-delay:var(--phase,0s)}
+.wc .familiar{color:var(--brand)}
+.wc .trending{color:#89631a}
+.wc button:is(:hover,:focus-visible) span{animation:none}
+.wc button.blink span{animation:wblink 1.15s ease-in-out}
+@keyframes wblink{0%,100%{opacity:.9;transform:none}42%{opacity:.16;transform:scale(.93)}}
+.wc-tip{position:fixed;z-index:5;width:min(268px,calc(100vw - 24px));pointer-events:none;
+  background:#fffdf7;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+  box-shadow:0 12px 30px #26382d20;color:var(--ink);font-size:13px;line-height:1.55}
+.wc-tip strong,.wc-tip small{display:block}.wc-tip small{margin-top:5px;color:var(--ink-2)}
+@keyframes word-breathe{
+  0%,100%{opacity:.75;transform:scale(.98)}
+  50%{opacity:1;transform:scale(1.045)}
+}
+@media(max-width:1250px){.wc{display:none}}
+@media(prefers-reduced-motion:reduce){.wc button span{animation:none}}
+
+/* 主体 */
+.wrap{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:120px 56px 0}
+.kicker{margin-bottom:18px;color:var(--brand)}
+h1{font:400 66px/1.1 var(--font-display);letter-spacing:.01em;margin:0 0 16px}
+h1 em{font-style:normal;color:var(--brand)}
+.title-char{position:relative}
+.title-char::after{content:"";position:absolute;right:-.013em;top:50%;width:.032em;height:.66em;
+  transform:translateY(-50%);border-radius:1px;background:var(--brand);opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){
+  .title-char::after{animation:title-hop 8s step-end infinite;animation-delay:calc(var(--i) * 320ms)}
+}
+@media(prefers-reduced-motion:reduce){.title-end::after{opacity:1}}
+@keyframes title-hop{0%{opacity:1}4%,100%{opacity:0}}
+.lede{font-size:17px;color:var(--ink-2);margin:0 0 34px;max-width:470px}
+
+/* 液态玻璃输入框 */
+.ask{display:flex;align-items:center;gap:14px;width:760px;view-transition-name:topic-glass;
+  border-radius:24px;padding:9px 9px 9px 20px}
+.ask .ic{width:17px;height:17px;border:1.6px solid #A9B6AB;border-radius:50%;position:relative;flex:0 0 auto}
+.ask .ic:after{content:"";position:absolute;right:-5px;bottom:-4px;width:8px;height:1.6px;
+  background:#A9B6AB;border-radius:2px;transform:rotate(45deg)}
+.ask .ph{flex:1;min-width:0;font:inherit;font-size:16.5px;color:var(--ink);background:none;border:0;position:relative}
+.ask .ph::placeholder{color:#7E8D82}
+.ask .kbd{font:500 11px/1 var(--font-mono);color:#8C978D;border:1px solid rgba(140,151,141,.4);
+  border-radius:5px;padding:4px 6px;margin-right:6px}
+.ask .go{padding:13px 22px;border-radius:12px;font-size:14.5px}
+
+/* 路径卡 */
+.pick{margin-top:52px}
+.pick .lab{font-size:12.5px;color:var(--ink-3);margin-bottom:12px;letter-spacing:.02em}
+.paths{display:flex;gap:18px}
+.path{position:relative;width:378px;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;cursor:pointer;
+  box-shadow:var(--shadow-1);transition:border-color .18s,box-shadow .18s,transform .18s}
+.path:hover{border-color:rgba(47,107,79,.55);box-shadow:0 1px 2px rgba(28,43,35,.05),0 18px 40px -22px rgba(28,43,35,.3);transform:translateY(-2px)}
+.path .tag{display:inline-block;font-size:11.5px;color:var(--brand);background:var(--brand-soft);
+  border-radius:999px;padding:4px 10px;margin-bottom:14px}
+.path.alt .tag{color:#8A5A34;background:#F6EDE3}
+.path h3{margin:0 0 8px;font-size:19px;font-weight:700;letter-spacing:.01em}
+.path p{margin:0 0 18px;font-size:13.5px;color:var(--ink-2);line-height:1.7}
+.path .foot{display:flex;align-items:center;justify-content:space-between;
+  padding-top:14px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-3)}
+.path .foot i{font-style:normal;font-size:15px;color:var(--brand);transition:transform .18s}
+.path:hover .foot i{transform:translateX(3px)}
+
+.helper{margin-top:18px;font-size:12.5px;color:var(--ink-3)}
+.helper a{color:var(--ink-2);border-bottom:1px dashed var(--line-strong);text-decoration:none;padding-bottom:1px}
+@media(max-width:1250px){
+  body{width:auto;height:auto;min-height:100svh;overflow:visible}
+  .ask{width:min(100%,760px)}
+}
+@media(max-width:720px){
+  .topbar{height:58px;padding-inline:18px}
+  .topnav{display:none}
+  .wrap{padding:54px 20px 44px}
+  h1{font-size:clamp(36px,9vw,56px)}
+  .lede{margin-bottom:26px;font-size:16px}
+  .ask{gap:9px;padding:7px 7px 7px 13px}
+  .ask .ic,.ask .kbd{display:none}
+  .ask .go{min-height:44px;padding:8px 12px;white-space:nowrap}
+  .pick{margin-top:32px}
+  .paths{flex-direction:column;gap:12px}
+  .path{width:100%;padding:17px}
+}
+</style>
+</head>
+<body>
+<canvas id="dots"></canvas>
+<div class="glow"></div>
+
+<div class="wc" role="group" aria-label="选题灵感"></div>
+<div class="wc-tip" id="word-tip" role="tooltip" hidden></div>
+<script defer src="word-cloud.js"></script>
+<script defer src="cloud-fx.js"></script>
+
+<header class="topbar">
+  <div class="brand"><span class="mark">w</span><span>wo<b>Frame</b></span></div>
+  <nav class="topnav">
+    <span>示例</span><span>画风</span><span>使用说明</span><span class="pill">本地运行 · 无需登录</span>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="kicker">WORD → FRAME</div>
+  <h1><span class="title-char" style="--i:0">一</span><span class="title-char" style="--i:1">个</span><span class="title-char" style="--i:2">词</span><span class="title-char" style="--i:3">，</span><em><span class="title-char" style="--i:4">一</span><span class="title-char" style="--i:5">帧</span></em><span class="title-char title-end" style="--i:6">。</span></h1>
+  <p class="lede">把脑子里的想法说清楚，剩下的讲稿、分镜和画面交给我们。第一次做也可以。</p>
+
+  <form class="ask liquid-glass" id="start-topic" action="reference.html">
+    <span class="ic"></span>
+    <input class="ph" id="home-topic" name="topic" aria-label="你想讲什么" placeholder="比如：微积分、唐朝、为什么天是蓝的" maxlength="120">
+    <span class="kbd">Enter</span>
+    <button class="btn btn-primary go">开始 →</button>
+  </form>
+
+  <div class="pick">
+    <div class="lab">你更接近哪种情况？</div>
+    <div class="paths">
+      <button class="path" type="submit" form="start-topic">
+        <span class="tag">第一次做</span>
+        <h3>我只有一个想法</h3>
+        <p>先看几条同类爆款，挑一个"感觉对"的，再回答几个问题，自动生成讲稿和成片。</p>
+        <span class="foot"><span>约 1 分钟 · 不用剪辑</span><i>→</i></span>
+      </button>
+      <button class="path alt">
+        <span class="tag">我自己出镜</span>
+        <h3>我有素材，或想自己录</h3>
+        <p>导入拍好的视频，或直接开摄像头逐镜录；脚本、字幕和画面由系统补齐。</p>
+        <span class="foot"><span>支持逐镜重录 · 手机上传</span><i>→</i></span>
+      </button>
+    </div>
+    <div class="helper">不确定选哪个？<a href="reference.html#examples" onclick="this.search = new URLSearchParams({topic: document.getElementById('home-topic').value})">先看一条别人做的</a></div>
+  </div>
+</main>
+<script>
+  document.getElementById('home-topic').value = new URLSearchParams(location.search).get('topic') ?? '';
+</script>
+</body>
+</html>
