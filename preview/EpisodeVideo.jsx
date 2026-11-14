@@ -1,6 +1,31 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Html5Video, Sequence, staticFile} from 'remotion';
+import {AbsoluteFill, Audio, Html5Video, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {episodeSizes, episodeComposition} from './episode.mjs';
+
+function TimedOverlay({scene}) {
+  const frame = useCurrentFrame();
+  const cue = scene.cues?.findLast(item => item.frame <= frame);
+  const caption = cue?.text ?? scene.caption;
+  const screenText = scene.cues?.findLast(item => item.frame <= frame && item.screenText)?.screenText ?? scene.text;
+  const emphasis = cue?.emphasis;
+  const start = emphasis && caption ? caption.indexOf(emphasis) : -1;
+  const progress = cue ? Math.min(1, (frame - cue.frame + 1) / 7) : 1;
+  return <>
+    {screenText && <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+      padding: '10%', fontSize: 68, fontWeight: 700}}>{screenText}</AbsoluteFill>}
+    {caption && <div style={{position: 'absolute', bottom: '12%', left: '8%', right: '8%', padding: '2%',
+    textAlign: 'center', background: '#101b28ee', fontSize: 44}}>
+    {start < 0 ? caption : <>
+      {caption.slice(0, start)}
+      <mark style={{display: 'inline-block', transform: `scale(${1 + Math.sin(Math.PI * progress) * 0.12})`,
+        color: '#e8ffaf', background: '#536d36', borderRadius: 7, padding: '0 .18em', fontWeight: 700}}>
+        {emphasis}
+      </mark>
+      {caption.slice(start + emphasis.length)}
+    </>}
+    </div>}
+  </>;
+}
 
 export function EpisodeVideo({project, assetBase, onError}) {
   const asset = name => {
@@ -22,8 +47,7 @@ export function EpisodeVideo({project, assetBase, onError}) {
           onError={() => onError?.(`分镜 ${index + 1} 的视频加载失败`)}
           style={{width: '100%', height: '100%', objectFit: 'contain'}} />}
         {scene.audio && <Audio src={asset(scene.audio)} onError={() => onError?.(`分镜 ${index + 1} 的音频加载失败`)} />}
-        {scene.text && <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '10%', fontSize: 68, fontWeight: 700}}>{scene.text}</AbsoluteFill>}
-        {scene.caption && <div style={{position: 'absolute', bottom: '12%', left: '8%', right: '8%', padding: '2%', textAlign: 'center', background: '#101b28ee', fontSize: 44}}>{scene.caption}</div>}
+        <TimedOverlay scene={scene} />
       </Sequence>;
     })}
     </AbsoluteFill>

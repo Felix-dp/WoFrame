@@ -144,6 +144,9 @@ async function main([command, first, second]) {
         const seconds = mediaDuration(resolve(dirname(first), scene.audio));
         if (seconds === null) return;
         const frames = Math.max(1, Math.round(seconds * fps));
+        if (scene.cues?.some(cue => cue.frame >= frames)) {
+          throw new Error(`分镜 ${index + 1} 的标注超出音频时长，请先调整 cues 帧号`);
+        }
         if (frames !== scene.frames) {
           changes.push({scene: index + 1, audio: scene.audio, seconds: +seconds.toFixed(2),
             from: scene.frames, to: frames});

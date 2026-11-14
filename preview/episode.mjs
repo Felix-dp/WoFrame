@@ -23,6 +23,26 @@ function localAsset(value) {
   }
 }
 
+function validateCues(cues, frames) {
+  if (cues === undefined) return;
+  if (!Array.isArray(cues) || cues.length === 0) throw new Error('cues 须为非空数组');
+  let previous = -1;
+  for (const cue of cues) {
+    if (!Number.isInteger(cue?.frame) || cue.frame <= previous || cue.frame >= frames ||
+        typeof cue.text !== 'string' || !cue.text.trim()) {
+      throw new Error('标注须有文字和镜内帧号，且按从零开始的帧号递增');
+    }
+    if (cue.emphasis !== undefined && (typeof cue.emphasis !== 'string' ||
+        !cue.emphasis.trim() || !cue.text.includes(cue.emphasis))) {
+      throw new Error('标注的 emphasis 须是 text 中的一段文字');
+    }
+    if (cue.screenText !== undefined && (typeof cue.screenText !== 'string' || !cue.screenText.trim())) {
+      throw new Error('标注的 screenText 须为非空文字');
+    }
+    previous = cue.frame;
+  }
+}
+
 export function validateEpisode(project) {
   const {title, route, scenes, bgm, fps = 30} = project;
   const ratio = project.ratio ?? project.preferences?.ratio ?? '9:16';
@@ -45,6 +65,7 @@ export function validateEpisode(project) {
   scenes.forEach((scene, index) => {
     try {
       if (!Number.isInteger(scene?.frames) || scene.frames < 1) throw new Error('帧数必须是正整数');
+      validateCues(scene.cues, scene.frames);
       if (route === 'talking-head' && !scene.video) throw new Error('缺少口播视频');
       if ([scene.text, scene.caption].some(value => value != null && typeof value !== 'string')) {
         throw new Error('画面文字和字幕须为字符串');
