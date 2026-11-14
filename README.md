@@ -75,6 +75,8 @@ node scripts/woframe.mjs setup --install
 node scripts/woframe.mjs doctor
 ```
 
+Apple Silicon Mac 上需要本地 AI 旁白时，运行 `node scripts/woframe.mjs setup --track=vertical --install`，安装配音依赖并预下载约 2 GB 的 Qwen3-TTS 权重，之后可离线使用。
+
 需要 Node.js 22.12 以上及 FFmpeg。Remotion 首次渲染可下载 Headless Shell，使用封面模板另需本机 Chrome。走泛流量赛道时还需 [配置 Hypit 和参考分析工具](docs/environment.md#泛流量工具配置)。
 
 ### 3. 在 Agent 里开工

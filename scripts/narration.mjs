@@ -1,12 +1,15 @@
-import {spawn} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 import {mkdtemp, readFile, rename, rm, writeFile} from 'node:fs/promises';
 import {basename, dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {validateEpisode} from '../preview/episode.mjs';
 import {sceneTiming} from './project-media.mjs';
+import {loadRequirements} from './env.mjs';
 
-const hasLocalQwen = process.platform === 'darwin' && process.arch === 'arm64';
+export const hasLocalQwen = process.platform === 'darwin' && process.arch === 'arm64';
 const qwenRunner = fileURLToPath(new URL('./qwen-narration.py', import.meta.url));
+const localDefault = 'qwen-vivian';
+const qwenSetup = 'node scripts/woframe.mjs setup --track=vertical --install';
 const voices = [
   {id: 'qwen-vivian', provider: 'qwen', speaker: 'Vivian', label: 'Vivian · 清亮女声', language: 'zh-CN'},
   {id: 'qwen-serena', provider: 'qwen', speaker: 'Serena', label: 'Serena · 温和女声', language: 'zh-CN'},
@@ -23,10 +26,25 @@ export function narrationVoices(language) {
   return options.map(voice => ({...voice, availableOnPlatform: voice.provider !== 'qwen' || hasLocalQwen}));
 }
 
-function run(command, args, input) {
+function qwenArgs({install = false} = {}) {
+  const {python, runtime} = loadRequirements().narration;
+  return ['run', ...(install ? [] : ['--offline', '--no-python-downloads']),
+    '--no-project', '--python', python, '--with', runtime, 'python', qwenRunner];
+}
+
+export function qwenReady() {
+  return hasLocalQwen && spawnSync('uv', [...qwenArgs(), '--check'],
+    {stdio: 'ignore', timeout: 20000, env: {...process.env, HF_HUB_OFFLINE: '1'}}).status === 0;
+}
+
+export async function installQwenNarration() {
+  await run('uv', [...qwenArgs({install: true}), '--download']);
+}
+
+function run(command, args, input, env = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {stdio: ['pipe', 'ignore', 'inherit'],
-      env: {...process.env, HF_HUB_DISABLE_XET: process.env.HF_HUB_DISABLE_XET ?? '1'}});
+      env: {...process.env, HF_HUB_DISABLE_XET: process.env.HF_HUB_DISABLE_XET ?? '1', ...env}});
     child.once('error', error => reject(error.code === 'ENOENT' ? new Error('找不到 uv，请先运行 setup --install') : error));
     child.once('close', (code, signal) => {
       if (code === 0) resolve();
@@ -42,8 +60,9 @@ async function synthesize(voice, jobs) {
     if (!hasLocalQwen) {
       throw new Error('本地 Qwen 声线需要 Apple Silicon Mac。其他系统可选对应语言的 Edge 声线。');
     }
-    await run('uv', ['run', '--no-project', '--python', '3.12', '--with', 'mlx-audio==0.6.5',
-      'python', qwenRunner], JSON.stringify({speaker: voice.speaker, language: 'Chinese', jobs}));
+    if (!qwenReady()) throw new Error('本地 Qwen 依赖尚未就绪，请先运行 ' + qwenSetup);
+    await run('uv', qwenArgs(), JSON.stringify({speaker: voice.speaker, language: 'Chinese', jobs}),
+      {HF_HUB_OFFLINE: '1'});
     return;
   }
   for (const {text, file} of jobs) {
@@ -70,7 +89,7 @@ export async function narrateEpisode(file, {voiceId, sample = false, generate = 
   }
   const language = episode.language ?? 'zh-CN';
   const options = narrationVoices(language);
-  const chosen = voiceId ?? project.preferences?.narrationVoice;
+  const chosen = voiceId ?? project.preferences?.narrationVoice ?? (hasLocalQwen && language === 'zh-CN' ? localDefault : undefined);
   const voice = options.find(item => item.id === chosen);
   if (!voice) throw new Error(`请用 voices --language=${language} 查看声线，再通过 --voice 指定一个可用 ID`);
 

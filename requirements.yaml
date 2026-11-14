@@ -9,6 +9,11 @@ node: ">=22.12"
 npm:
   install: true
 
+# 仅当选用不露脸垂直配音环境且运行于 Apple Silicon 时安装。
+narration:
+  python: "3.12"
+  runtime: mlx-audio==0.6.5
+
 checks:
   - id: ffmpeg
     why: 视频编码、封面与成片处理

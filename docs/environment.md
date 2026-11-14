@@ -4,7 +4,8 @@
 
 ```sh
 node scripts/woframe.mjs setup              # 逐项检查，输出 JSON
-node scripts/woframe.mjs setup --install    # 缺什么装什么，装完自动复查
+node scripts/woframe.mjs setup --install    # 安装基础依赖，装完自动复查
+node scripts/woframe.mjs setup --track=vertical --install  # 同时准备本地配音（Apple Silicon）
 ```
 
 Agent 在开始提问之前先跑一次；缺必需依赖就先补，再进流程。
@@ -56,6 +57,9 @@ hypit doctor
 ## 可选依赖
 
 ### 合成旁白
+
+在 Apple Silicon Mac 上用 `node scripts/woframe.mjs setup --track=vertical --install` 一次安装配音运行环境并缓存 Qwen3-TTS 权重。首次需联网，无需账号，模型约 2 GB，另需 Python 依赖空间。再次执行会复用缓存。仅运行基础 `setup --install` 时不会下载模型。可以用 `setup --track=vertical` 检查 `narration.ready`。
+
 
 第二条路线没有录音、需要 AI 配音时，在 `public/work/<项目>/episode.json` 用 `route: "faceless"` 和 `preferences.track: "vertical"`，再给需要朗读的每镜填 `narrationText`。它是确认过的口播文稿，可以与画面标题和字幕不同。例如，一个分镜可以写成：
 

@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {validateEpisode} from '../preview/episode.mjs';
 import {publishingPlan} from '../preview/publishing.mjs';
-import {narrateEpisode, narrationVoices} from './narration.mjs';
+import {hasLocalQwen, installQwenNarration, narrateEpisode, narrationVoices, qwenReady} from './narration.mjs';
 import {checkAssets, projectAssets, sceneTiming} from './project-media.mjs';
 import {evaluateRequirements, findHypit, hypitReadiness, installMissing} from './env.mjs';
 
@@ -105,14 +105,31 @@ async function main([command, first, second]) {
       return;
     }
     case 'setup': {
-      const report = evaluateRequirements();
-      print(report);
+      const track = flag('track');
+      if (track && !trackIds.includes(track)) throw new Error('赛道须为 ' + trackIds.join('、'));
+      const local = track === 'vertical' && hasLocalQwen;
+      const report = evaluateRequirements({needsUv: local});
+      const withNarration = (status, cached) => ({
+        ...status,
+        ready: status.ready && (!local || cached),
+        narration: local ? {provider: 'qwen', ready: cached}
+          : track === 'vertical' ? {provider: 'qwen', supported: false} : undefined,
+      });
+      const cached = local && qwenReady();
+      print(withNarration(report, cached));
       if (!has('install')) return;
-      if (!report.missing.length) return;
+      if (!report.missing.length && !local) return;
       const installed = installMissing(report);
-      const after = evaluateRequirements();
-      print({installed, after});
-      if (!after.ready) process.exitCode = 1;
+      const after = evaluateRequirements({needsUv: local});
+      let prepared = cached;
+      if (after.ready && local && !cached) {
+        await installQwenNarration();
+        installed.push('Qwen3-TTS');
+        prepared = qwenReady();
+      }
+      const finalReport = withNarration(after, prepared);
+      print({installed, after: finalReport});
+      if (!finalReport.ready) process.exitCode = 1;
       return;
     }
     case 'voices': {
@@ -284,7 +301,7 @@ async function main([command, first, second]) {
       return;
     }
     default:
-      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | voices [--language=] | narrate <episode.json> [--voice=] [--sample] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--resolution=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
+      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--track=] [--install] | voices [--language=] | narrate <episode.json> [--voice=] [--sample] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--resolution=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
   }
 }
 
