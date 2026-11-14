@@ -114,6 +114,8 @@ output/
 | `handbooks` / `find-handbook <系列名>` | 检索系列沉淀 |
 | `save-handbook <项目.json>` | 沉淀本集确认过的设置（同名合并） |
 | `apply-handbook <handbook> <项目.json>` | 把系列默认值合入新一集 |
+| `voices [--language=]` | 查看 AI 配音声线 |
+| `narrate <项目.json> [--voice=] [--sample]` | 为不露脸垂直项目试听或生成[旁白](docs/environment.md#合成旁白) |
 | `check <项目.json>` | 校验素材、时间轴与画幅 |
 | `fit <项目.json> [--write]` | 按独立旁白或口播原片时长重算分镜帧数 |
 | `render <项目.json> [--ep=] [--ratio=] [--resolution=] [--out=]` | 渲染所有发布画幅，或指定一个画幅。单画幅可指定输出文件 |

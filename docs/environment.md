@@ -55,4 +55,25 @@ hypit doctor
 
 ## 可选依赖
 
-需要合成旁白时，可在安装 `uv` 后用 `uv tool install edge-tts` 安装在线配音工具，或使用用户已有的配音服务。把生成的音频保存到项目目录，在每镜的 `audio` 字段填相对路径，再运行 `fit --write`。已备有录音、只用视频原声或计划交付无旁白视频时可以跳过。
+### 合成旁白
+
+第二条路线没有录音、需要 AI 配音时，在 `public/work/<项目>/episode.json` 用 `route: "faceless"` 和 `preferences.track: "vertical"`，再给需要朗读的每镜填 `narrationText`。它是确认过的口播文稿，可以与画面标题和字幕不同。例如，一个分镜可以写成：
+
+```json
+{"frames": 120, "text": "周末只剩两个小时", "narrationText": "周末只剩两个小时。你会去兼职，还是把拖了一周的项目做完？"}
+```
+
+```bash
+PROJECT="public/work/<项目>/episode.json"
+node scripts/woframe.mjs voices --language=zh-CN
+node scripts/woframe.mjs narrate "$PROJECT" --voice=qwen-vivian --sample
+node scripts/woframe.mjs narrate "$PROJECT" --voice=qwen-uncle-fu --sample
+node scripts/woframe.mjs narrate "$PROJECT" --voice=qwen-vivian
+node scripts/woframe.mjs check "$PROJECT" --strict
+```
+
+`--sample` 只生成第一段旁白开头的最多 140 个字符，打印本地试听文件路径。选定声线后，`narrate` 逐镜生成音频、更新 `audio` 并按声音时长调整 `frames`。更换 `--voice` 会重新生成已有的 AI 旁白，保留用户提供的录音及旧音频文件。先配音，再按实际发声时间添加 `cues`；已经标好 `cues` 的分镜需要重新对齐才能换声。系列确认后可以通过 `save-handbook` 记住声线，续集用 `apply-handbook` 后可省略 `--voice`。
+
+- **Qwen3-TTS** 在 Apple Silicon Mac 上本地运行，提供 Vivian、Serena 和 Uncle Fu 三条普通话预设声线。需安装 `uv`，首次调用下载 Python 依赖与模型权重，后续使用本机缓存。 [Qwen3-TTS 模型说明](https://github.com/QwenLM/Qwen3-TTS)
+- **Edge 在线语音** 提供晓晓、云希以及英语和日语声线，可用于其他系统或快速试听。需 `uv` 和网络，会把朗读文本提交给在线服务。项目使用前请确认符合服务使用条款。 [Edge TTS 工具说明](https://github.com/rany2/edge-tts)
+- 如果已录好旁白或使用其他配音服务，将文件放在项目目录，再给每镜填写 `audio`，用 `fit --write` 对齐即可。

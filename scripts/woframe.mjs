@@ -6,6 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {validateEpisode} from '../preview/episode.mjs';
 import {publishingPlan} from '../preview/publishing.mjs';
+import {narrateEpisode, narrationVoices} from './narration.mjs';
 import {checkAssets, projectAssets, sceneTiming} from './project-media.mjs';
 import {evaluateRequirements, findHypit, hypitReadiness, installMissing} from './env.mjs';
 
@@ -17,7 +18,7 @@ const outputRoot = join(repoRoot, 'output');
 const trackIds = ['traffic', 'vertical', 'persona'];
 const keys = ['track', 'series', 'audience', 'targetSeconds', 'pace', 'platform', 'ratio', 'style',
   'visualStyle', 'coverStyle', 'hostRole', 'staging', 'speech', 'takeRule',
-  'voice', 'bgmStyle', 'captionStyle', 'materialSource', 'pipShape'];
+  'voice', 'narrationVoice', 'bgmStyle', 'captionStyle', 'materialSource', 'pipShape'];
 const preferences = value => Object.fromEntries(keys.filter(key =>
   ['string', 'number', 'boolean'].includes(typeof value?.[key])).map(key => [key, value[key]]));
 const installed = (name, args) => spawnSync(name, args, {stdio: 'ignore', timeout: 3000}).status === 0;
@@ -112,6 +113,14 @@ async function main([command, first, second]) {
       const after = evaluateRequirements();
       print({installed, after});
       if (!after.ready) process.exitCode = 1;
+      return;
+    }
+    case 'voices': {
+      print({voices: narrationVoices(flag('language'))});
+      return;
+    }
+    case 'narrate': {
+      print(await narrateEpisode(first, {voiceId: flag('voice'), sample: has('sample')}));
       return;
     }
     case 'check': {
@@ -275,7 +284,7 @@ async function main([command, first, second]) {
       return;
     }
     default:
-      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--resolution=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
+      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | voices [--language=] | narrate <episode.json> [--voice=] [--sample] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--resolution=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
   }
 }
 
