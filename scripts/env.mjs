@@ -126,7 +126,7 @@ export function hypitReadiness() {
   return {ready: true, warnings};
 }
 
-export function evaluateRequirements() {
+export function evaluateRequirements({needsUv = false} = {}) {
   const requirements = loadRequirements();
   const results = [];
 
@@ -152,7 +152,7 @@ export function evaluateRequirements() {
     results.push({
       id: check.id,
       ok,
-      required: Boolean(check.required),
+      required: Boolean(check.required || (needsUv && check.id === 'uv')),
       detail: check.why ?? '',
       fix: check[platformKey] ?? '',
     });

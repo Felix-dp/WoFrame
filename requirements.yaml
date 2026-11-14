@@ -9,6 +9,17 @@ node: ">=22.12"
 npm:
   install: true
 
+# 按系统安装不露脸垂直路线的本地配音运行环境。
+narration:
+  python: "3.12"
+  mlx: mlx-audio==0.6.5
+  windows:
+    runtime: qwen-tts==0.1.1
+    torch: torch==2.9.1+cpu
+    torchaudio: torchaudio==2.9.1+cpu
+    numpy: numpy<2.3
+    torch_index: https://download.pytorch.org/whl/cpu
+
 checks:
   - id: ffmpeg
     why: 视频编码、封面与成片处理

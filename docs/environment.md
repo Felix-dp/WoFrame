@@ -4,7 +4,8 @@
 
 ```sh
 node scripts/woframe.mjs setup              # 逐项检查，输出 JSON
-node scripts/woframe.mjs setup --install    # 缺什么装什么，装完自动复查
+node scripts/woframe.mjs setup --install    # 安装基础依赖，装完自动复查
+node scripts/woframe.mjs setup --track=vertical --install  # 同时准备本地配音（Apple Silicon 或 Windows x64）
 ```
 
 Agent 在开始提问之前先跑一次；缺必需依赖就先补，再进流程。
@@ -55,4 +56,41 @@ hypit doctor
 
 ## 可选依赖
 
-需要合成旁白时，可在安装 `uv` 后用 `uv tool install edge-tts` 安装在线配音工具，或使用用户已有的配音服务。把生成的音频保存到项目目录，在每镜的 `audio` 字段填相对路径，再运行 `fit --write`。已备有录音、只用视频原声或计划交付无旁白视频时可以跳过。
+### 合成旁白
+
+在 Apple Silicon Mac 或 Windows x64 上运行 `node scripts/woframe.mjs setup --track=vertical --install`。安装器根据 Node.js 的系统和架构选择运行库和权重：
+
+| 系统 | 运行库 | 首次模型下载 |
+| --- | --- | --- |
+| Apple Silicon Mac（ARM64 Node.js） | MLX，8-bit 权重 | 约 2 GB |
+| Windows x64（x64 Node.js） | PyTorch CPU，官方 0.6B CustomVoice 权重 | 约 2.5 GB |
+
+两者还需要 Python 依赖的磁盘空间。Windows 版走 CPU，不要求独立显卡或 CUDA，生成速度随机器而异。首次联网下载，无需账号；安装完成可离线配音。再次运行会复用本机缓存。只装基础依赖时，使用 `setup --install`。用 `setup --track=vertical` 查看 `narration.backend` 和 `narration.ready`。Windows 如果刚装好 uv 但当前终端尚未识别，请重开 PowerShell 后再运行安装。
+
+第二条路线没有录音、需要 AI 配音时，在 `public/work/<项目>/episode.json` 用 `route: "faceless"` 和 `preferences.track: "vertical"`，再给需要朗读的每镜填 `narrationText`。它是确认过的口播文稿，可以与画面标题和字幕不同。例如，一个分镜可以写成：
+
+```json
+{"frames": 120, "text": "周末只剩两个小时", "narrationText": "周末只剩两个小时。你会去兼职，还是把拖了一周的项目做完？"}
+```
+
+```bash
+PROJECT="public/work/<项目>/episode.json"
+node scripts/woframe.mjs voices --language=zh-CN
+node scripts/woframe.mjs narrate "$PROJECT" --voice=qwen-vivian,qwen-serena,qwen-uncle-fu --sample
+node scripts/woframe.mjs narrate "$PROJECT" --voice=qwen-vivian
+node scripts/woframe.mjs check "$PROJECT" --strict
+```
+
+`--sample` 只生成第一段旁白开头的最多 140 个字符，打印本地试听文件路径。用逗号分隔多个声线 ID，可以批量试听同一段文稿。选定声线后，`narrate` 逐镜生成音频、更新 `audio` 并按声音时长调整 `frames`。更换 `--voice` 会重新生成已有的 AI 旁白，保留用户提供的录音及旧音频文件。先配音，再按实际发声时间添加 `cues`；已经标好 `cues` 的分镜需要重新对齐才能换声。系列确认后可以通过 `save-handbook` 记住声线，续集用 `apply-handbook` 后可省略 `--voice`。
+
+- **Qwen3-TTS** 是这两个平台的默认配音模型。默认声线按语言选取，手动选择和已保存的系列声线优先。模型准备好后可离线使用，9 条预设共用同一份模型。 [Qwen3-TTS 官方声线表](https://github.com/QwenLM/Qwen3-TTS#custom-voice-generate)
+- **Edge 在线语音** 可手动选择，适用于未支持本地 Qwen 的系统。需 `uv` 和网络，会把朗读文本提交给在线服务。 [Edge TTS 工具说明](https://github.com/rany2/edge-tts)
+- 如果已录好旁白或使用其他配音服务，将文件放在项目目录，再给每镜填写 `audio`，用 `fit --write` 对齐即可。
+
+
+| 项目语言 | 本地 Qwen 声线 ID |
+| --- | --- |
+| 中文 `zh-CN` | `qwen-vivian`（默认）、`qwen-serena`、`qwen-uncle-fu`、`qwen-dylan`（北京口音）、`qwen-eric`（成都口音） |
+| 英文 `en-US` | `qwen-ryan`（默认）、`qwen-aiden` |
+| 日语 `ja-JP` | `qwen-ono-anna`（默认） |
+| 韩语 `ko-KR` | `qwen-sohee`（默认） |

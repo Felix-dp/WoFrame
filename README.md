@@ -75,6 +75,8 @@ node scripts/woframe.mjs setup --install
 node scripts/woframe.mjs doctor
 ```
 
+Apple Silicon Mac 和 Windows x64 上需要本地 AI 旁白时，运行 `node scripts/woframe.mjs setup --track=vertical --install`。WoFrame 按系统下载 Qwen3-TTS 权重和 Python 依赖，之后可离线使用 9 条预设声线。见[系统与下载说明](docs/environment.md#合成旁白)。
+
 需要 Node.js 22.12 以上及 FFmpeg。Remotion 首次渲染可下载 Headless Shell，使用封面模板另需本机 Chrome。走泛流量赛道时还需 [配置 Hypit 和参考分析工具](docs/environment.md#泛流量工具配置)。
 
 ### 3. 在 Agent 里开工
@@ -114,13 +116,15 @@ output/
 | `handbooks` / `find-handbook <系列名>` | 检索系列沉淀 |
 | `save-handbook <项目.json>` | 沉淀本集确认过的设置（同名合并） |
 | `apply-handbook <handbook> <项目.json>` | 把系列默认值合入新一集 |
+| `voices [--language=]` | 查看 AI 配音声线 |
+| `narrate <项目.json> [--voice=] [--sample]` | 为不露脸垂直项目试听或生成[旁白](docs/environment.md#合成旁白) |
 | `check <项目.json>` | 校验素材、时间轴与画幅 |
 | `fit <项目.json> [--write]` | 按独立旁白或口播原片时长重算分镜帧数 |
 | `render <项目.json> [--ep=] [--ratio=] [--resolution=] [--out=]` | 渲染所有发布画幅，或指定一个画幅。单画幅可指定输出文件 |
 | `deliver <文件> --track= --series= --ep= --title=` | 把外部产物（如 Hypit 成片、封面）移入 output |
 | `npm run preview` | 逐镜审片（可选，不参与出片） |
 
-导出支持 `480p`、`720p`、`1080p`。可在预览页选择画质，也可以在项目 JSON 中设置 `resolution`。命令行 `--resolution` 优先，默认 1080p。项目 JSON 的 `language` 用来标记内容语言，支持 `zh-CN`、`en-US`、`ja-JP`。
+导出支持 `480p`、`720p`、`1080p`。可在预览页选择画质，也可以在项目 JSON 中设置 `resolution`。命令行 `--resolution` 优先，默认 1080p。项目 JSON 的 `language` 用来标记内容语言，支持 `zh-CN`、`en-US`、`ja-JP`、`ko-KR`。
 
 ### 随旁白标出重点
 
