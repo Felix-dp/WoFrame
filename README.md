@@ -35,6 +35,23 @@ WoFrame 把它们收成一条可执行的流程：**先定赛道 → 按支路�
 
 Ⅱ 和 Ⅲ 共用同一条主干，只在"人"的部分分叉。第一集确认过的选择会沉淀成该系列的 Handbook；下次开工，Agent 先查 Handbook，只问这一集新增的问题。
 
+## Demo 展示
+
+### Ⅱ 不露脸垂直 · Mehve 读书
+
+以下画面截自两支 Remotion 成片。两集都采用纸页拼贴和本地 Qwen3-TTS Serena 配音，第二集通过 Handbook 复用了第一集的栏目设置。
+
+| EP01《你当像鸟飞往你的山》· 36 秒 | EP02《心流：投入感从哪里来》· 40 秒 |
+| --- | --- |
+| <img src="docs/assets/demos/route-2-educated-idaho.jpg" width="160" alt="第一集成片画面，左侧为书封，右侧为爱达荷州山景"> <img src="docs/assets/demos/route-2-educated-author.jpg" width="160" alt="第一集成片画面，主图切换为作者塔拉·韦斯特弗的肖像"> | <img src="docs/assets/demos/route-2-flow-goal.jpg" width="160" alt="第二集成片画面，球场图标出十次发球六次进区的目标"> <img src="docs/assets/demos/route-2-flow-challenge.jpg" width="160" alt="第二集成片画面，球场图用逐层缩小的目标区表示提高难度"> |
+| 旁白讲到不同的成长阶段时，主图随之换成山景、校园、三一学院旧绘和作者肖像。 | 旁白讲目标、反馈和难度时，球场图依次显示目标区、实际落点和缩小后的目标区。 |
+
+### Ⅲ 露脸个人 IP
+
+Demo 待制作。计划展示真人口播与讲解画面的切换，包括全屏讲述和缩到小窗后展开图解。参见[露脸口播模板](docs/persona-video-template.md)。
+
+[路演截图、讲解要点与素材来源](docs/demo-showcase.md)
+
 ## 核心功能
 
 - **赛道定位**：第一轮只问一件事——账号靠什么活下去。给三个具体场景让用户选，拿不准时用三个问题分流，不让用户理解"赛道"这种词。
