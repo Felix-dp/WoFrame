@@ -48,7 +48,13 @@ WoFrame 把它们收成一条可执行的流程：**先定赛道 → 按支路�
 
 ### Ⅲ 露脸个人 IP
 
-Demo 待制作。计划展示真人口播与讲解画面的切换，包括全屏讲述和缩到小窗后展开图解。参见[露脸口播模板](docs/persona-video-template.md)。
+**《BoHack 天津站：最后一天早上做什么》** · 13 秒
+
+<img src="docs/assets/demos/route-3-bohack-promo.jpg" width="840" alt="路线三宣传图，米白画面显示项目提交时间、提交示意和日新轨迹，右下小窗为虚构博主">
+
+WoFrame 将现场录制剪成日程速览，去掉明显的看稿停顿，保留讲述者原声。开场用真人全屏引入，讲到项目提交和早餐安排时，讲述者缩到圆形小窗，图解随口播切换，最后回到全屏收尾。参见[露脸口播模板](docs/persona-video-template.md)。
+
+*上图为宣传用画面，小窗使用 AI 生成的虚构博主。*
 
 [路演截图、讲解要点与素材来源](docs/demo-showcase.md)
 
