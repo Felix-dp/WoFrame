@@ -332,7 +332,14 @@ async function main([command, first, second]) {
 
 const positional = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
 
-main(positional).catch(error => {
+await main(positional).catch(error => {
   console.error(error.message);
   process.exitCode = 1;
 });
+
+if (positional[0] === 'render') {
+  // Render and cleanup have finished. Chrome can leave inherited pipes open.
+  await Promise.all([process.stdout, process.stderr].map(stream =>
+    new Promise(resolve => stream.write('', resolve))));
+  process.exit(process.exitCode ?? 0);
+}
