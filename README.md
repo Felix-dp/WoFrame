@@ -75,7 +75,7 @@ node scripts/woframe.mjs setup --install
 node scripts/woframe.mjs doctor
 ```
 
-Apple Silicon Mac 上需要本地 AI 旁白时，运行 `node scripts/woframe.mjs setup --track=vertical --install`，安装配音依赖并预下载约 2 GB 的 Qwen3-TTS 权重，之后可离线使用。
+Apple Silicon Mac 上需要本地 AI 旁白时，运行 `node scripts/woframe.mjs setup --track=vertical --install`，准备默认配音模型 Qwen3-TTS。首次下载约 2 GB 权重，之后可离线试听并使用 9 条预设声线。
 
 需要 Node.js 22.12 以上及 FFmpeg。Remotion 首次渲染可下载 Headless Shell，使用封面模板另需本机 Chrome。走泛流量赛道时还需 [配置 Hypit 和参考分析工具](docs/environment.md#泛流量工具配置)。
 
@@ -124,7 +124,7 @@ output/
 | `deliver <文件> --track= --series= --ep= --title=` | 把外部产物（如 Hypit 成片、封面）移入 output |
 | `npm run preview` | 逐镜审片（可选，不参与出片） |
 
-导出支持 `480p`、`720p`、`1080p`。可在预览页选择画质，也可以在项目 JSON 中设置 `resolution`。命令行 `--resolution` 优先，默认 1080p。项目 JSON 的 `language` 用来标记内容语言，支持 `zh-CN`、`en-US`、`ja-JP`。
+导出支持 `480p`、`720p`、`1080p`。可在预览页选择画质，也可以在项目 JSON 中设置 `resolution`。命令行 `--resolution` 优先，默认 1080p。项目 JSON 的 `language` 用来标记内容语言，支持 `zh-CN`、`en-US`、`ja-JP`、`ko-KR`。
 
 ### 随旁白标出重点
 

@@ -57,7 +57,7 @@ export function validateEpisode(project) {
     throw new Error('请填写标题，选择 talking-head 或 faceless');
   }
   resolutionScale(project.resolution);
-  if (project.language != null && !['zh-CN', 'en-US', 'ja-JP'].includes(project.language)) throw new Error('项目语言须为 zh-CN、en-US 或 ja-JP');
+  if (project.language != null && !['zh-CN', 'en-US', 'ja-JP', 'ko-KR'].includes(project.language)) throw new Error('项目语言须为 zh-CN、en-US、ja-JP 或 ko-KR');
   const track = project.preferences?.track;
   if (track != null && !tracks.includes(track)) throw new Error(`赛道须为 ${tracks.join('、')}`);
   if (project.preferences?.pipShape != null && !pipShapes.includes(project.preferences.pipShape)) {

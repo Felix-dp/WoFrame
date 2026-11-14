@@ -137,7 +137,27 @@ async function main([command, first, second]) {
       return;
     }
     case 'narrate': {
-      print(await narrateEpisode(first, {voiceId: flag('voice'), sample: has('sample')}));
+      if (!first) throw new Error('用法：narrate <项目.json> [--voice=声线ID] [--sample]');
+      const voiceId = flag('voice');
+      const sample = has('sample');
+      const requested = voiceId?.split(',').map(id => id.trim());
+      if (requested?.some(id => !id)) throw new Error('--voice 需要声线 ID');
+      if (requested?.length > 1) {
+        if (!sample) throw new Error('只有 --sample 可以同时选择多个声线');
+        const candidates = [...new Set(requested)];
+        const project = await read(first);
+        const options = narrationVoices(project.language ?? 'zh-CN');
+        for (const id of candidates) {
+          if (!options.some(voice => voice.id === id && voice.availableOnPlatform)) {
+            throw new Error('当前语言或系统不支持声线 ' + id);
+          }
+        }
+        const samples = [];
+        for (const id of candidates) samples.push(await narrateEpisode(first, {voiceId: id, sample}));
+        print({ok: true, samples});
+      } else {
+        print(await narrateEpisode(first, {voiceId: requested?.[0], sample}));
+      }
       return;
     }
     case 'check': {

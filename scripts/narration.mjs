@@ -8,12 +8,20 @@ import {loadRequirements} from './env.mjs';
 
 export const hasLocalQwen = process.platform === 'darwin' && process.arch === 'arm64';
 const qwenRunner = fileURLToPath(new URL('./qwen-narration.py', import.meta.url));
-const localDefault = 'qwen-vivian';
+const qwenLanguages = {'zh-CN': 'Chinese', 'en-US': 'English', 'ja-JP': 'Japanese', 'ko-KR': 'Korean'};
+const localDefaults = {'zh-CN': 'qwen-vivian', 'en-US': 'qwen-ryan', 'ja-JP': 'qwen-ono-anna', 'ko-KR': 'qwen-sohee'};
 const qwenSetup = 'node scripts/woframe.mjs setup --track=vertical --install';
 const voices = [
   {id: 'qwen-vivian', provider: 'qwen', speaker: 'Vivian', label: 'Vivian · 清亮女声', language: 'zh-CN'},
   {id: 'qwen-serena', provider: 'qwen', speaker: 'Serena', label: 'Serena · 温和女声', language: 'zh-CN'},
   {id: 'qwen-uncle-fu', provider: 'qwen', speaker: 'Uncle_Fu', label: 'Uncle Fu · 沉稳男声', language: 'zh-CN'},
+  {id: 'qwen-dylan', provider: 'qwen', speaker: 'Dylan', label: 'Dylan · 北京口音男声', language: 'zh-CN'},
+  {id: 'qwen-eric', provider: 'qwen', speaker: 'Eric', label: 'Eric · 成都口音男声', language: 'zh-CN'},
+  {id: 'qwen-ryan', provider: 'qwen', speaker: 'Ryan', label: 'Ryan · 节奏鲜明的英语男声', language: 'en-US'},
+  {id: 'qwen-aiden', provider: 'qwen', speaker: 'Aiden', label: 'Aiden · 明朗的美式英语男声', language: 'en-US'},
+  {id: 'qwen-ono-anna', provider: 'qwen', speaker: 'Ono_Anna', label: 'Ono Anna · 轻快的日语女声', language: 'ja-JP'},
+  {id: 'qwen-sohee', provider: 'qwen', speaker: 'Sohee', label: 'Sohee · 温暖的韩语女声', language: 'ko-KR'},
+  {id: 'edge-sunhi', provider: 'edge', speaker: 'ko-KR-SunHiNeural', label: 'SunHi · 韩语女声', language: 'ko-KR'},
   {id: 'edge-xiaoxiao', provider: 'edge', speaker: 'zh-CN-XiaoxiaoNeural', label: '晓晓 · 温和女声', language: 'zh-CN'},
   {id: 'edge-yunxi', provider: 'edge', speaker: 'zh-CN-YunxiNeural', label: '云希 · 活泼男声', language: 'zh-CN'},
   {id: 'edge-jenny', provider: 'edge', speaker: 'en-US-JennyNeural', label: 'Jenny · 英语女声', language: 'en-US'},
@@ -22,7 +30,7 @@ const voices = [
 
 export function narrationVoices(language) {
   const options = voices.filter(voice => !language || voice.language === language);
-  if (!options.length) throw new Error('配音语言须为 zh-CN、en-US 或 ja-JP');
+  if (!options.length) throw new Error('配音语言须为 zh-CN、en-US、ja-JP 或 ko-KR');
   return options.map(voice => ({...voice, availableOnPlatform: voice.provider !== 'qwen' || hasLocalQwen}));
 }
 
@@ -58,10 +66,10 @@ function run(command, args, input, env = {}) {
 async function synthesize(voice, jobs) {
   if (voice.provider === 'qwen') {
     if (!hasLocalQwen) {
-      throw new Error('本地 Qwen 声线需要 Apple Silicon Mac。其他系统可选对应语言的 Edge 声线。');
+      throw new Error('本地 Qwen 声线需要 Apple Silicon Mac。其他系统可手动选择对应语言的 Edge 声线。');
     }
     if (!qwenReady()) throw new Error('本地 Qwen 依赖尚未就绪，请先运行 ' + qwenSetup);
-    await run('uv', qwenArgs(), JSON.stringify({speaker: voice.speaker, language: 'Chinese', jobs}),
+    await run('uv', qwenArgs(), JSON.stringify({speaker: voice.speaker, language: qwenLanguages[voice.language], jobs}),
       {HF_HUB_OFFLINE: '1'});
     return;
   }
@@ -89,7 +97,7 @@ export async function narrateEpisode(file, {voiceId, sample = false, generate = 
   }
   const language = episode.language ?? 'zh-CN';
   const options = narrationVoices(language);
-  const chosen = voiceId ?? project.preferences?.narrationVoice ?? (hasLocalQwen && language === 'zh-CN' ? localDefault : undefined);
+  const chosen = voiceId ?? project.preferences?.narrationVoice ?? (hasLocalQwen ? localDefaults[language] : undefined);
   const voice = options.find(item => item.id === chosen);
   if (!voice) throw new Error(`请用 voices --language=${language} 查看声线，再通过 --voice 指定一个可用 ID`);
 

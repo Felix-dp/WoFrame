@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {narrateEpisode} from '../scripts/narration.mjs';
+import {hasLocalQwen, narrateEpisode, narrationVoices} from '../scripts/narration.mjs';
 
 const narration = fileURLToPath(new URL('../public/examples/baoyan/narration.wav', import.meta.url));
 
@@ -52,3 +52,17 @@ test('failed synthesis preserves the project and removes the incomplete take', a
   assert.equal(await read(), original);
   assert.deepEqual((await readdir(dir)).sort(), ['episode.json', 'recorded.wav']);
 });
+
+
+test('Qwen voices match the project language and the default can be overridden',
+  {skip: !hasLocalQwen}, async t => {
+    const {file, project} = await fixture(t);
+    project.language = 'ja-JP';
+    await writeFile(file, JSON.stringify(project));
+
+    await assert.rejects(narrateEpisode(file, {voiceId: 'qwen-vivian', sample: true, generate}), /ja-JP/);
+    const sample = await narrateEpisode(file, {sample: true, generate});
+    assert.equal(sample.voice, 'qwen-ono-anna');
+    assert.deepEqual(narrationVoices('ko-KR').filter(voice => voice.provider === 'qwen').map(voice => voice.id),
+      ['qwen-sohee']);
+  });
