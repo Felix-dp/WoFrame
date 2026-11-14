@@ -40,9 +40,9 @@ WoFrame 把它们收成一条可执行的流程：**先定赛道 → 按支路�
 - **两条生产流程**：泛流量走"模仿爆款"的快速链路；垂直与 IP 走"选题 → 文稿 → 成片"的三步链路，成片引擎各自明确。
 - **系列沉淀**：Handbook 按赛道存在 `handbooks/<赛道>/<系列名>.json`，第一集成片后自动生成，同名合并写入，不覆盖已有设定。
 - **项目即配置**：一集视频就是一个 `episode.json`——画幅、分镜、字幕、配音、BGM 全在里面，可版本管理、可回滚。
-- **规范出片**：`render` 无头渲染直接产出 MP4，写入 `output/<赛道>/<系列名>/EP01-标题-9x16.mp4`，文件名由命令生成。
-- **质量闸门**：`check` 校验素材与时间轴；`fit` 读音频真实时长重算帧数，解决"渲染完才发现音画差半秒"。
-- **封面体系**：五套风格（简·色块、科技·霓虹、电影·学术、切片·信息条、纸感·编辑），一套模板适配 16:9 / 3:4 / 4:3 / 1:1。
+- **规范出片**：`render` 按发布计划将各画幅 MP4 写入 `output/<赛道>/<系列名>/`，文件名由命令生成。
+- **质量闸门**：`check` 校验素材与时间轴；`fit` 按独立旁白或口播原片时长重算帧数。
+- **封面体系**：五套风格（简·色块、科技·霓虹、电影·学术、切片·信息条、纸感·编辑），模板支持 16:9 / 9:16 / 3:4 / 4:3 / 1:1。
 - **发布规格**：按平台与发布入口生成 `publishingTargets`，确定主发入口、视频画幅与封面画幅，同画幅共用导出版本。
 
 ## 技术亮点
@@ -64,7 +64,7 @@ git clone https://github.com/Felix-dp/WoFrame.git
 cd WoFrame
 ```
 
-### 2. 一次装齐依赖
+### 2. 安装基础依赖
 
 依赖清单只有一份 [requirements.yaml](requirements.yaml)，macOS 走 brew、Windows 走 winget，只装缺的：
 
@@ -73,7 +73,7 @@ node scripts/woframe.mjs setup --install
 node scripts/woframe.mjs doctor
 ```
 
-需要 Node.js 22.12 以上；ffmpeg 必需，Chrome 可选（首次渲染时 Remotion 也能自动下载）。
+需要 Node.js 22.12 以上及 FFmpeg。Remotion 首次渲染可下载 Headless Shell，使用封面模板另需本机 Chrome。走泛流量赛道时还需 [配置 Hypit 和参考分析工具](docs/environment.md#泛流量工具配置)。
 
 ### 3. 在 Agent 里开工
 
@@ -88,7 +88,7 @@ node scripts/woframe.mjs doctor
 ```bash
 PROJECT="public/work/<项目>/episode.json"
 
-node scripts/woframe.mjs check "$PROJECT"             # 校验素材与时间轴
+node scripts/woframe.mjs check "$PROJECT" --strict    # 校验素材与时间轴
 node scripts/woframe.mjs fit   "$PROJECT" --write     # 音画对不齐时重算帧数
 node scripts/woframe.mjs render "$PROJECT" --ep=01    # 出片
 node scripts/woframe.mjs save-handbook "$PROJECT"     # 第一集沉淀系列
@@ -113,8 +113,8 @@ output/
 | `save-handbook <项目.json>` | 沉淀本集确认过的设置（同名合并） |
 | `apply-handbook <handbook> <项目.json>` | 把系列默认值合入新一集 |
 | `check <项目.json>` | 校验素材、时间轴与画幅 |
-| `fit <项目.json> [--write]` | 按音频真实时长重算每镜帧数 |
-| `render <项目.json> [--ep=] [--out=]` | 无头渲染，直接写入 output |
+| `fit <项目.json> [--write]` | 按独立旁白或口播原片时长重算分镜帧数 |
+| `render <项目.json> [--ep=] [--ratio=] [--out=]` | 渲染所有发布画幅，或指定一个画幅。单画幅可指定输出文件 |
 | `deliver <文件> --track= --series= --ep= --title=` | 把外部产物（如 Hypit 成片、封面）移入 output |
 | `npm run preview` | 逐镜审片（可选，不参与出片） |
 

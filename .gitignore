@@ -4,7 +4,6 @@ node_modules/
 
 # 构建与渲染产物
 dist/
-legacy/studio/out/
 *.log
 
 # 系统与编辑器
@@ -26,3 +25,10 @@ _scratch/
 .env.*
 public/work/
 workspace/
+
+# 本机系列设定
+handbooks/*/*.json
+
+# Hypit 本机运行配置
+.hypit/
+hypit.runtime.json

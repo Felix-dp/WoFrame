@@ -5,6 +5,7 @@ import {dirname, isAbsolute, join, relative, resolve} from 'node:path';
 import {pipeline} from 'node:stream/promises';
 import {fileURLToPath} from 'node:url';
 import {isEpisodePath, validateEpisode} from './episode.mjs';
+import {projectAssets, checkAssets, sceneTiming} from '../scripts/project-media.mjs';
 
 const entryPoint = fileURLToPath(new URL('./render-root.jsx', import.meta.url));
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
@@ -56,14 +57,20 @@ async function prepareProject(payload, assetsDir) {
   }
   if (!isEpisodePath(path)) throw new RequestError(400, '请选择 public/work 或 public/examples 内的项目 JSON');
   const episode = await localFile(await realpath(publicDir), path.slice(1), '找不到项目 JSON');
-  const media = new Set([project.bgm, ...project.scenes.flatMap(scene => [scene.video, scene.audio])]);
   await mkdir(assetsDir);
-  for (const name of media) {
-    if (!name) continue;
+  for (const name of projectAssets(project)) {
     const source = await localFile(dirname(episode), name, `项目素材不可用：${name}`);
     const target = join(assetsDir, name);
     await mkdir(dirname(target), {recursive: true});
     await copyFile(source, target);
+  }
+  try {
+    await checkAssets(project, assetsDir);
+    if (sceneTiming(project, assetsDir).warnings.length) {
+      throw new Error('分镜时长不匹配，请运行 check --strict 查看详情');
+    }
+  } catch (error) {
+    throw new RequestError(400, error.message);
   }
   return project;
 }

@@ -86,6 +86,6 @@ node design/covers/build.mjs --style cinema --format 3x4 --out public/work/ep02/
   --note 已经沉掉的，不参与下一次选择
 ```
 
-`--format` 支持 `16x9`、`3x4`、`4x3`、`1x1`。C 风格的概念图用 `--figure <png|svg>` 换，D 风格的静帧用 `--still <png|jpg>` 换。不传参数运行 `node design/covers/build.mjs all` 会重出全部样品。
+`--format` 支持 `16x9`、`9x16`、`3x4`、`4x3`、`1x1`。C 风格的概念图用 `--figure <png|svg>` 换，D 风格的静帧用 `--still <png|jpg>` 换。不传参数运行 `node design/covers/build.mjs all` 会重出样品库中的 16:9 和 3:4 两组。
 
 出图后仍要按手机缩略图和发布页裁切复核，再交付 JPG 或 PNG。

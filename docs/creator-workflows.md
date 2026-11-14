@@ -61,19 +61,19 @@ node scripts/woframe.mjs deliver "./hypit-out.mp4" --track=traffic --series=泛�
 
 ## Ⅰ 泛流量：照着爆款做
 
-不问讲稿，只问「有没有想模仿的」。
+确认赛道后先检查 [泛流量工具配置](environment.md#泛流量工具配置)，再问「有没有想模仿的」。
 
 1. **有想模仿的**：问借内容、结构还是风格（可多选）。接收本地视频，或让 Agent 用已接入的平台接口解析外链为可访问素材；链接读取失败就请用户上传。参考素材和成片素材分别记账。
 2. **没有想模仿的**：问领域和平台。有搜索工具时，抓该领域近期火爆视频，返回链接、发布日期、能核实的互动量和推荐理由，由用户选一条。拿不到可核实的热门数据时，如实说明资料性质，改为和用户一起定讲法，或用 `public/examples` 的示例项目给用户看一下成片长什么样。
-3. **video-use**：对选定媒体做转录、时间轴和画面检查，把借鉴项整理成时间范围、内容要点、段落顺序、节奏、字幕或视觉特征。转录按上游说明配置 ElevenLabs 和 FFmpeg；分析不可用时，接受用户口述继续。
-4. **Hypit 生成首版**：把参考路径、借鉴项、时间轴观察和新主题交给它，生成、构建、回看。要生成新素材时，按 Hypit 所用服务配置凭据与额度。**输出目录直接指向 `output/traffic/<账号名>/`**，文件名按 `EP01-标题-9x16.mp4`；账号名还没定就用 `泛流量`。
+3. **分析参考片**：用已装的 `video-use` 或 Hypit 的 `transcribe` 和 `media` 做转录和画面检查。整理借鉴项的时间范围、段落、节奏和视觉特征。自动转录不可用时，可以使用用户提供的文字或口述。
+4. **Hypit 生成首版**：把参考路径、借鉴项、时间轴观察和新主题交给它，生成、构建、回看。用 `hypit get <build-id> --output <名称> --to <目标文件>` 直接导出到 `output/traffic/<账号名>/`。文件名按 `EP01-标题-<实际画幅>.mp4`，账号名还没定就用 `泛流量`。
 5. **交付**：确认成片已经落在 `output/traffic/<账号名>/`。Hypit 只能输出到自己目录时，用 `deliver` 移过去（移动，不留副本，泛流量可以省略 `--series`）。再给一份借鉴摘要——借了什么、没借什么。
 
 这条不做系列，不锁版式。画幅在 Hypit 出片时按主发平台定（竖屏或横屏），不走下面 Remotion 那套发布规格；封面每条按 [封面风格](cover-styles.md) 的 A 或 B 现选，随片一起交付。
 
 Ⅰ 和 Ⅱ/Ⅲ 的成片是两条管线：Ⅰ 追速度，交给 Hypit 直接出片；Ⅱ/Ⅲ 要系列一致，用 Remotion 渲染。不要把 Ⅰ 拉回 Remotion，也不要用 Ⅱ/Ⅲ 的发布规格去套 Ⅰ。
 
-## Ⅱ 口播出镜 · Ⅲ 不露脸：同一条 0-1-2
+## Ⅱ 不露脸垂直 · Ⅲ 露脸个人 IP：共用 0-1-2
 
 两条支路共用这条流程，差别只在第 1 步要不要出镜。露脸 IP 额外记住：人设、镜头前怎么说话、在哪拍，这些第一集定完就沿用，别每集重问。
 
@@ -94,15 +94,15 @@ node scripts/woframe.mjs deliver "./hypit-out.mp4" --track=traffic --series=泛�
 
 确认后再问三件事：
 
-- 素材来源：提醒用户这一步可以交素材——要出镜就录好放进 `public/work/<项目>/`，照片、录屏同理。交不交、交哪些由用户决定，没交就按现有素材继续；不露脸在这里定图解或录屏
-- 音频：原声还是 BGM；主声轨和 BGM 分别处理
+- 素材来源：录好的视频和其他素材放进 `public/work/<项目>/`。Ⅱ 可用文字图解或录屏，静态图可先制成分镜视频。Ⅲ 暂无素材时先交提词和分镜，必要的出镜镜头齐备后再渲染
+- 音频：确认主声轨用视频原声、独立旁白还是无旁白，再单独决定 BGM。合成旁白可按 [可选依赖](environment.md#可选依赖) 生成音频后填入分镜
 - 视觉效果：字幕、画面风格；第一集还要定封面方向（见 [封面风格](cover-styles.md)）
 
 ### 2 成片
 
 按 [示例](../public/examples/episode.json) 组装项目 JSON，用 `ratio` 从 `9:16`、`16:9`、`3:4`、`4:3` 和 `1:1` 选择画幅。素材路径相对项目 JSON。每个分镜包含 `frames`，可带 `caption`、`text`、`video` 或 `audio`；`bgm` 为项目级背景音乐。露脸口播每镜要有视频；不露脸可以只用文字与字幕。分镜音频和视频原声同时存在时，视频静音。时长由帧数和 FPS 决定，按实际素材时长对齐；需要逐字字幕时拆成更短的字幕区间。
 
-先跑 `node scripts/woframe.mjs check <项目.json>`。如果 `warnings` 报音画时长对不上，跑 `fit --write` 按音频实际时长重算每镜 `frames`，再 `check` 一次：
+先跑 `node scripts/woframe.mjs check <项目.json> --strict`。如果时长不匹配，`fit --write` 优先按独立旁白对齐，否则按露脸口播原片重算 `frames`。若独立旁白比镜头长，补足镜头后再检查：
 
 ```sh
 node scripts/woframe.mjs fit "public/work/<项目>/episode.json" --write
@@ -114,7 +114,7 @@ node scripts/woframe.mjs fit "public/work/<项目>/episode.json" --write
 node scripts/woframe.mjs render "public/work/<项目>/episode.json" --ep=01
 ```
 
-成片直接写到 `output/<track>/<系列名>/`。**先看再定稿**：用户在当地播放验收，通过才算完成；不通过就改 JSON 再 render 一次。
+成片直接写到 `output/<track>/<系列名>/`。配置了多个发布入口时，同画幅共用一条 MP4，并按主发入口优先渲染。只重做一个画幅时可加 `--ratio=16:9`。**先看再定稿**：用户在本地播放验收，通过才算完成。
 
 ### 3 交付
 
@@ -148,7 +148,7 @@ node scripts/woframe.mjs find-handbook 零基础经济学
 node scripts/woframe.mjs apply-handbook handbooks/vertical/零基础经济学.json public/work/episode-2/episode.json
 ```
 
-`preferences` 只存跨集设置：`track`、`series`、`platform`、`ratio`、`coverStyle`、`captionStyle`、`bgmStyle`，以及 Ⅲ 的 `hostRole`、`staging`、`speech`、`takeRule`。保存命令创建新文件并拒绝覆盖；合并命令输出 JSON，由 Agent 审阅后写入本集项目。项目字段 `ratio` 可省略，预览读 `preferences.ratio`；已有项目的 `ratio` 优先。项目和云服务凭据留在本地。
+`preferences` 保存跨集设置，如 `platform`、`ratio`、`coverStyle` 及 Ⅲ 的出镜约定。`apply-handbook` 输出合并后的 JSON，由 Agent 写入本集项目。同一系列的主画幅在保存 Handbook 时优先取第一个发布入口的画幅，其次取项目的 `ratio`。Handbook、项目和云服务凭据留在本地。
 
 ## 发布规格
 

@@ -7,9 +7,9 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const chrome = detectChrome();
 if (!chrome) {
-  throw new Error('找不到 Chrome，用来把封面模板截成图。跑 node scripts/woframe.mjs setup --install，或用 WOFRAME_CHROME 指向可执行文件。');
+  throw new Error('找不到 Chrome。请安装 Google Chrome，或用 WOFRAME_CHROME 指向可执行文件。');
 }
-const SIZES = {'16x9':[1920,1080], '3x4':[1080,1440], '4x3':[1440,1080], '1x1':[1080,1080]};
+const SIZES = {'16x9':[1920,1080], '9x16':[1080,1920], '3x4':[1080,1440], '4x3':[1440,1080], '1x1':[1080,1080]};
 const SLOTS = ['series', 'ep', 'title', 'hook', 'k1', 'k2', 'k3', 'note', 'sub', 'figure', 'still'];
 
 export const styles = ['min', 'tech', 'cinema', 'slice', 'paper'];

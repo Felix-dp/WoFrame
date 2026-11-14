@@ -311,9 +311,9 @@ if (still && cover) {
   });
 }
 const fmt = Q.get("format") || "16x9";
-const size = { "16x9":[1920,1080], "3x4":[1080,1440], "1x1":[1080,1080], "4x3":[1440,1080] }[fmt];
+const size = { "16x9":[1920,1080], "9x16":[1080,1920], "3x4":[1080,1440], "1x1":[1080,1080], "4x3":[1440,1080] }[fmt];
 if (size) { document.getElementById("stage").style.width = size[0]+"px"; document.getElementById("stage").style.height = size[1]+"px"; }
-document.body.setAttribute("data-format", fmt);
+document.body.setAttribute("data-format", fmt === "9x16" ? "3x4" : fmt);
 document.documentElement.setAttribute("data-ready","1");
 </script>
 </body>

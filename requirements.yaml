@@ -18,7 +18,7 @@ checks:
     windows: winget install --id Gyan.FFmpeg -e
     linux: sudo apt install ffmpeg
   - id: ffprobe
-    why: 读取音频真实时长，供 fit 与 check 对齐
+    why: 读取音视频真实时长，供 fit 与 check 对齐
     command: ffprobe -version
     required: true
     darwin: brew install ffmpeg
@@ -31,14 +31,14 @@ checks:
     windows: winget install --id Google.Chrome -e
     linux: sudo apt install google-chrome-stable
   - id: uv
-    why: 配音工具链，不露脸支路后续启用
+    why: 安装可选的配音工具
     command: uv --version
     required: false
     darwin: brew install uv
     windows: winget install --id astral-sh.uv -e
     linux: curl -LsSf https://astral.sh/uv/install.sh | sh
   - id: edge-tts
-    why: 离线配音，不露脸支路后续启用
+    why: 不露脸视频的可选在线配音工具
     command: edge-tts --help
     required: false
     darwin: uv tool install edge-tts

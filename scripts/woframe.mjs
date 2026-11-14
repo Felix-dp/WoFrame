@@ -1,12 +1,13 @@
-import {access, copyFile, mkdir, mkdtemp, readFile, readdir, rename, rm, unlink, writeFile} from 'node:fs/promises';
+import {access, copyFile, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, unlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {createRequire} from 'node:module';
 import {dirname, extname, join, relative, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {validateEpisode} from '../preview/episode.mjs';
-import {evaluateRequirements, installMissing} from './env.mjs';
 import {publishingPlan} from '../preview/publishing.mjs';
+import {checkAssets, projectAssets, sceneTiming} from './project-media.mjs';
+import {evaluateRequirements, findHypit, hypitReadiness, installMissing} from './env.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const print = value => console.log(JSON.stringify(value, null, 2));
@@ -23,7 +24,7 @@ const installed = (name, args) => spawnSync(name, args, {stdio: 'ignore', timeou
 const require = createRequire(import.meta.url);
 const exists = file => access(file).then(() => true, () => false);
 const clean = value => String(value ?? '').trim()
-  .replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '-').replace(/-{2,}/g, '-').replace(/^-|-$/g, '');
+  .replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '-').replace(/-{2,}/g, '-').replace(/^[-.]+|[-.]+$/g, '');
 const flag = name => {
   const hit = process.argv.find(arg => arg.startsWith('--' + name + '='));
   return hit ? hit.slice(name.length + 3) : undefined;
@@ -43,13 +44,6 @@ function seriesName(prefs, fallback) {
   const value = clean(prefs.series) || clean(fallback);
   if (!value) throw new Error('需要一个系列名或项目标题来命名，先给这一集起个名');
   return value;
-}
-
-function mediaDuration(file) {
-  const probe = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file],
-    {encoding: 'utf8'});
-  const seconds = Number.parseFloat(String(probe.stdout ?? '').trim());
-  return Number.isFinite(seconds) ? seconds : null;
 }
 
 function hasRemotion() {
@@ -81,6 +75,10 @@ async function listHandbooks() {
       let data;
       try {
         data = await read(file);
+        if (data?.version !== 1 || !data.preferences || data.preferences.track !== track) {
+          skipped.push({file: relative(repoRoot, file), reason: 'Handbook 格式或赛道不匹配'});
+          continue;
+        }
       } catch {
         skipped.push({file: relative(repoRoot, file), reason: 'JSON 读取失败'});
         continue;
@@ -95,66 +93,54 @@ async function listHandbooks() {
 
 async function main([command, first, second]) {
   switch (command) {
-    case 'doctor':
+    case 'doctor': {
+      const track = flag('track');
+      if (track && !trackIds.includes(track)) throw new Error('赛道须为 ' + trackIds.join('、'));
+      const traffic = track === 'traffic' ? hypitReadiness() : undefined;
       print({node: process.version, ffmpeg: installed('ffmpeg', ['-version']),
-        hypitCli: installed('hypit', ['--version']), uv: installed('uv', ['--version']),
-        elevenLabsKey: Boolean(process.env.ELEVENLABS_API_KEY),
-        hypitKey: Boolean(process.env.HYPIT_API_KEY),
-        remotion: hasRemotion()});
+        ffprobe: installed('ffprobe', ['-version']), hypitCli: Boolean(findHypit()),
+        remotion: hasRemotion(), traffic});
+      if (traffic && !traffic.ready) process.exitCode = 1;
       return;
+    }
     case 'setup': {
       const report = evaluateRequirements();
       print(report);
       if (!has('install')) return;
       if (!report.missing.length) return;
       const installed = installMissing(report);
-      print({installed, after: evaluateRequirements()});
+      const after = evaluateRequirements();
+      print({installed, after});
+      if (!after.ready) process.exitCode = 1;
       return;
     }
     case 'check': {
       if (!await exists(first)) throw new Error('找不到项目文件：' + first);
       const episode = validateEpisode(await read(first));
       publishingPlan(episode.publishingTargets ?? []);
-      const files = new Set([episode.bgm, ...episode.scenes.flatMap(scene => [scene.video, scene.audio])]);
-      for (const file of files) if (file) await access(resolve(dirname(first), file));
-      const warnings = [];
-      episode.scenes.forEach((scene, index) => {
-        if (!scene.audio) return;
-        const seconds = mediaDuration(resolve(dirname(first), scene.audio));
-        if (seconds === null) return;
-        const playable = scene.frames / episode.fps;
-        if (Math.abs(seconds - playable) > 0.2) {
-          warnings.push({scene: index + 1, audio: scene.audio, audioSeconds: +seconds.toFixed(2),
-            frames: scene.frames, playableSeconds: +playable.toFixed(2),
-            suggestedFrames: Math.max(1, Math.round(seconds * episode.fps))});
-        }
-      });
-      print({ok: true, scenes: episode.scenes.length, seconds: episode.duration / episode.fps, warnings});
-      if (warnings.length && has('strict')) {
-        throw new Error('音画时长对不上，先跑 fit --write 对齐');
+      if (has('strict') && !episode.preferences?.track) {
+        throw new Error('项目缺少 preferences.track，请先确认赛道');
       }
+      const projectDir = dirname(resolve(first));
+      await checkAssets(episode, projectDir);
+      const {warnings} = sceneTiming(episode, projectDir);
+      const ok = !has('strict') || !warnings.length;
+      print({ok, scenes: episode.scenes.length, seconds: episode.duration / episode.fps, warnings});
+      if (!ok) throw new Error('分镜时长不匹配，请运行 fit --write 或换用足够长的素材');
       return;
     }
     case 'fit': {
       const episode = await read(first);
-      const fps = episode.fps ?? 30;
-      const changes = [];
-      (episode.scenes ?? []).forEach((scene, index) => {
-        if (!scene.audio) return;
-        const seconds = mediaDuration(resolve(dirname(first), scene.audio));
-        if (seconds === null) return;
-        const frames = Math.max(1, Math.round(seconds * fps));
-        if (frames !== scene.frames) {
-          changes.push({scene: index + 1, audio: scene.audio, seconds: +seconds.toFixed(2),
-            from: scene.frames, to: frames});
-          scene.frames = frames;
-        }
-      });
-      if (has('write') && changes.length) {
+      const validated = validateEpisode(episode);
+      const {fps} = validated;
+      const {changes, warnings} = sceneTiming(validated, dirname(resolve(first)), {fit: true});
+      const written = has('write') && changes.length > 0 && !warnings.length;
+      if (written) {
         await writeFile(first, JSON.stringify(episode, null, 2) + '\n');
       }
-      const total = (episode.scenes ?? []).reduce((sum, scene) => sum + (scene.frames ?? 0), 0);
-      print({ok: true, fps, seconds: total / fps, written: has('write') && changes.length > 0, changes});
+      const total = episode.scenes.reduce((sum, scene) => sum + scene.frames, 0);
+      print({ok: !warnings.length, fps, seconds: total / fps, written, changes, warnings});
+      if (warnings.length) process.exitCode = 1;
       return;
     }
     case 'handbooks': {
@@ -176,7 +162,9 @@ async function main([command, first, second]) {
     case 'save-handbook': {
       if (second) throw new Error('save-handbook 按赛道和系列名自动落盘，不再接收路径参数');
       const episode = await read(first);
-      const incoming = preferences({...episode.preferences, ...(episode.ratio && {ratio: episode.ratio})});
+      const primary = publishingPlan(episode.publishingTargets ?? []).destinations[0];
+      const ratio = primary?.videoRatio ?? episode.ratio ?? episode.preferences?.ratio;
+      const incoming = preferences({...episode.preferences, ratio});
       const {track, series, file} = handbookTarget(incoming, defaultSeries(incoming.track, episode.title));
       const previous = await exists(file) ? ((await read(file)).preferences ?? {}) : {};
       const prefs = preferences({...previous, ...incoming, track, series});
@@ -188,44 +176,70 @@ async function main([command, first, second]) {
     }
     case 'apply-handbook': {
       const handbook = await read(first);
-      if (handbook.version !== 1 || !handbook.preferences) throw new Error('Handbook 格式无效');
+      if (handbook?.version !== 1 || !trackIds.includes(handbook.preferences?.track)) {
+        throw new Error('Handbook 格式或赛道无效');
+      }
       const episode = await read(second);
+      if (episode.preferences?.track && episode.preferences.track !== handbook.preferences.track) {
+        throw new Error('Handbook 与本集赛道不同，请选择同赛道的系列设置');
+      }
       print({...episode, preferences: {...preferences(handbook.preferences), ...episode.preferences}});
       return;
     }
     case 'render': {
-      if (!first) throw new Error('用法：render <episode.json> [--ep=01] [--title=] [--out=]');
+      if (!first) throw new Error('用法：render <episode.json> [--ep=01] [--title=] [--ratio=] [--out=]');
       const episode = validateEpisode(await read(first));
       const prefs = episode.preferences ?? {};
       if (!trackIds.includes(prefs.track)) throw new Error('render 需要 project.preferences.track，先确认用户赛道');
       const series = seriesName(prefs, defaultSeries(prefs.track, episode.title));
-      const target = flag('out') ? resolve(flag('out')) : join(outputRoot, prefs.track, series,
-        artifactName({title: flag('title') ?? episode.title, ep: flag('ep') ?? '01', ratio: episode.ratio}));
-      await mkdir(dirname(target), {recursive: true});
+      const projectDir = dirname(resolve(first));
+      await checkAssets(episode, projectDir);
+      if (sceneTiming(episode, projectDir).warnings.length) {
+        throw new Error('分镜时长不匹配，请运行 check --strict 查看详情');
+      }
+      const plan = publishingPlan(episode.publishingTargets ?? []);
+      const ratios = plan.videos.length ? plan.videos.map(video => video.ratio) : [episode.ratio];
+      const selectedRatio = flag('ratio')?.replace('x', ':');
+      if (selectedRatio && !ratios.includes(selectedRatio)) throw new Error('可用画幅：' + ratios.join('、'));
+      const selectedRatios = selectedRatio ? [selectedRatio] : ratios;
+      const destination = flag('out');
+      if (destination && selectedRatios.length !== 1) throw new Error('输出多个画幅时请省略 --out，或通过 --ratio 选一个画幅');
+      const ep = flag('ep') ?? '01';
+      if (!/^\d+$/.test(ep)) throw new Error('集数须为数字');
+      const outputs = selectedRatios.map(ratio => ({
+        ratio, target: destination ? resolve(destination) : join(outputRoot, prefs.track, series,
+          artifactName({title: flag('title') ?? episode.title, ep, ratio})),
+      }));
       const workDir = await mkdtemp(join(tmpdir(), 'woframe-render-'));
       try {
         const [{bundle}, {selectComposition, renderMedia}] = await Promise.all([
           import('@remotion/bundler'), import('@remotion/renderer')]);
         const entryPoint = fileURLToPath(new URL('../preview/render-root.jsx', import.meta.url));
         const assetsDir = join(workDir, 'assets');
-        const projectDir = dirname(resolve(first));
-        const media = new Set([episode.bgm,
-          ...episode.scenes.flatMap(scene => [scene.video, scene.audio])].filter(Boolean));
-        for (const name of media) {
+        await mkdir(assetsDir);
+        for (const name of projectAssets(episode)) {
           const target = join(assetsDir, name);
           await mkdir(dirname(target), {recursive: true});
           await copyFile(join(projectDir, name), target);
         }
         const serveUrl = await bundle({entryPoint, publicDir: assetsDir, outDir: join(workDir, 'bundle')});
-        const inputProps = {project: episode};
         const browserExecutable = process.env.WOFRAME_CHROME || undefined;
-        const composition = await selectComposition({serveUrl, id: 'WoFrameEpisode', inputProps, browserExecutable});
-        await renderMedia({serveUrl, composition, inputProps, browserExecutable, codec: 'h264',
-          outputLocation: target, concurrency: 2, pixelFormat: 'yuv420p'});
+        for (const output of outputs) {
+          const inputProps = {project: {...episode, ratio: output.ratio}};
+          const composition = await selectComposition({serveUrl, id: 'WoFrameEpisode', inputProps, browserExecutable});
+          output.rendered = join(workDir, output.ratio.replace(':', 'x') + '.mp4');
+          await renderMedia({serveUrl, composition, inputProps, browserExecutable, codec: 'h264',
+            outputLocation: output.rendered, concurrency: 2, pixelFormat: 'yuv420p'});
+        }
+        for (const {target, rendered} of outputs) {
+          await mkdir(dirname(target), {recursive: true});
+          await copyFile(rendered, target);
+        }
       } finally {
         await rm(workDir, {recursive: true, force: true});
       }
-      print({ok: true, file: relative(repoRoot, target)});
+      const files = outputs.map(({ratio, target}) => ({ratio, file: relative(repoRoot, target)}));
+      print({ok: true, ...(files.length === 1 && {file: files[0].file}), files});
       return;
     }
     case 'deliver': {
@@ -234,16 +248,23 @@ async function main([command, first, second]) {
       if (!trackIds.includes(track)) throw new Error('deliver 需要 --track=' + trackIds.join('|'));
       const series = clean(flag('series')) || (track === 'traffic' ? '泛流量' : '');
       const title = clean(flag('title'));
-      const ep = String(flag('ep') ?? '').padStart(2, '0');
-      const ratio = flag('ratio') ?? '9x16';
-      if (!series || !title || !/^\d{2,}$/.test(ep)) throw new Error('deliver 需要 --series（泛流量可省略）、--title 和 --ep');
+      const ep = flag('ep') ?? '';
+      const ratio = (flag('ratio') ?? '9x16').replace(':', 'x');
+      if (!series || !title || !/^\d+$/.test(ep)) throw new Error('deliver 需要 --series（泛流量可省略）、--title 和 --ep');
+      if (!/^[1-9]\d*x[1-9]\d*$/.test(ratio)) throw new Error('画幅须为 9x16 或 9:16 格式');
       if (!await exists(first)) throw new Error('找不到成品文件：' + first);
       const target = join(outputRoot, track, series,
         artifactName({title, ep, ratio, cover: has('cover'), ext: extname(first) || '.mp4'}));
+      if (!(await stat(first)).isFile()) throw new Error('交付素材须为文件：' + first);
+      if (resolve(first) === target) {
+        print({ok: true, file: relative(repoRoot, target), moved: false});
+        return;
+      }
       await mkdir(dirname(target), {recursive: true});
       try {
         await rename(resolve(first), target);
-      } catch {
+      } catch (error) {
+        if (error.code !== 'EXDEV') throw error;
         await copyFile(first, target);
         await unlink(first);
       }
@@ -251,7 +272,7 @@ async function main([command, first, second]) {
       return;
     }
     default:
-      throw new Error('用法：woframe.mjs doctor | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
+      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
   }
 }
 
