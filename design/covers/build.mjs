@@ -1,5 +1,5 @@
 import {execFileSync} from 'node:child_process';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync, statSync} from 'node:fs';
 import {detectChrome} from '../../scripts/env.mjs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -17,7 +17,14 @@ export const styles = ['min', 'tech', 'cinema', 'slice', 'paper'];
 export function render({style, format = '16x9', out, text = {}}) {
   if (!styles.includes(style)) throw new Error('未知风格：' + style + '，可选 ' + styles.join(' / '));
   const [w, h] = SIZES[format] ?? (() => { throw new Error('未知画幅：' + format + '，可选 ' + Object.keys(SIZES).join(' / ')); })();
-  const query = new URLSearchParams({style, format, ...text}).toString();
+  const query = new URLSearchParams({style, format, ...text});
+  for (const slot of ['figure', 'still']) {
+    const value = text[slot];
+    if (!value || /^(?:https?:|data:|file:)/i.test(value)) continue;
+    const file = [resolve(value), resolve(here, value)].find(path => statSync(path, {throwIfNoEntry: false})?.isFile());
+    if (!file) throw new Error('找不到封面素材：' + value);
+    query.set(slot, pathToFileURL(file).href);
+  }
   const page = pathToFileURL(resolve(here, 'covers.html')).href + '?' + query;
   mkdirSync(dirname(out), {recursive: true});
   execFileSync(chrome, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-sandbox',
