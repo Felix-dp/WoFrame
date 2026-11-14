@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {validateEpisode} from '../preview/episode.mjs';
 import {publishingPlan} from '../preview/publishing.mjs';
-import {hasLocalQwen, installQwenNarration, narrateEpisode, narrationVoices, qwenReady} from './narration.mjs';
+import {hasLocalQwen, installQwenNarration, narrateEpisode, narrationVoices, qwenBackend, qwenReady} from './narration.mjs';
 import {checkAssets, projectAssets, sceneTiming} from './project-media.mjs';
 import {evaluateRequirements, findHypit, hypitReadiness, installMissing} from './env.mjs';
 
@@ -112,7 +112,7 @@ async function main([command, first, second]) {
       const withNarration = (status, cached) => ({
         ...status,
         ready: status.ready && (!local || cached),
-        narration: local ? {provider: 'qwen', ready: cached}
+        narration: local ? {provider: 'qwen', backend: qwenBackend, ready: cached}
           : track === 'vertical' ? {provider: 'qwen', supported: false} : undefined,
       });
       const cached = local && qwenReady();
