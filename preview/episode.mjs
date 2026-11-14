@@ -39,6 +39,10 @@ function validateCues(cues, frames) {
     if (cue.screenText !== undefined && (typeof cue.screenText !== 'string' || !cue.screenText.trim())) {
       throw new Error('标注的 screenText 须为非空文字');
     }
+    if (cue.cards !== undefined && (!Array.isArray(cue.cards) || cue.cards.length < 1 || cue.cards.length > 4 ||
+        cue.cards.some(card => typeof card !== 'string' || !card.trim() || card.length > 64))) {
+      throw new Error('标注的 cards 须为 1–4 项短文字');
+    }
     previous = cue.frame;
   }
 }

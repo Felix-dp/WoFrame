@@ -7,12 +7,26 @@ function TimedOverlay({scene}) {
   const cue = scene.cues?.findLast(item => item.frame <= frame);
   const caption = cue?.text ?? scene.caption;
   const screenText = scene.cues?.findLast(item => item.frame <= frame && item.screenText)?.screenText ?? scene.text;
+  const visualCue = scene.cues?.findLast(item => item.frame <= frame && item.cards);
+  const cards = visualCue?.cards;
   const emphasis = cue?.emphasis;
   const start = emphasis && caption ? caption.indexOf(emphasis) : -1;
   const progress = cue ? Math.min(1, (frame - cue.frame + 1) / 7) : 1;
   return <>
-    {screenText && <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center',
-      padding: '10%', fontSize: 68, fontWeight: 700}}>{screenText}</AbsoluteFill>}
+    {(screenText || cards) && <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+      padding: '10%', fontSize: 68, fontWeight: 700}}>
+      {screenText}
+      {cards && <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 20, marginTop: 34}}>
+        {cards.map((card, index) => {
+          const active = index === cards.length - 1;
+          const entrance = Math.min(1, (frame - visualCue.frame + 1) / 8);
+          return <div key={index} style={{padding: '14px 24px', borderRadius: 14, fontSize: 46,
+            color: active ? '#182318' : '#fff', background: active ? '#d6ff81' : '#374c59',
+            opacity: active ? 0.4 + 0.6 * entrance : 1,
+            transform: `translateY(${active ? (1 - entrance) * 14 : 0}px)`}}>{card}</div>;
+        })}
+      </div>}
+    </AbsoluteFill>}
     {caption && <div style={{position: 'absolute', bottom: '12%', left: '8%', right: '8%', padding: '2%',
     textAlign: 'center', background: '#101b28ee', fontSize: 44}}>
     {start < 0 ? caption : <>
