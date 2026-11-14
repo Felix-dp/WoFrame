@@ -134,6 +134,7 @@ async function main([command, first, second]) {
       const validated = validateEpisode(episode);
       const {fps} = validated;
       const {changes, warnings} = sceneTiming(validated, dirname(resolve(first)), {fit: true});
+      validateEpisode(episode);
       const written = has('write') && changes.length > 0 && !warnings.length;
       if (written) {
         await writeFile(first, JSON.stringify(episode, null, 2) + '\n');
@@ -187,8 +188,9 @@ async function main([command, first, second]) {
       return;
     }
     case 'render': {
-      if (!first) throw new Error('用法：render <episode.json> [--ep=01] [--title=] [--ratio=] [--out=]');
-      const episode = validateEpisode(await read(first));
+      if (!first) throw new Error('用法：render <episode.json> [--ep=01] [--title=] [--ratio=] [--resolution=] [--out=]');
+      const config = await read(first);
+      const episode = validateEpisode({...config, resolution: flag('resolution') ?? config.resolution});
       const prefs = episode.preferences ?? {};
       if (!trackIds.includes(prefs.track)) throw new Error('render 需要 project.preferences.track，先确认用户赛道');
       const series = seriesName(prefs, defaultSeries(prefs.track, episode.title));
@@ -206,9 +208,10 @@ async function main([command, first, second]) {
       if (destination && selectedRatios.length !== 1) throw new Error('输出多个画幅时请省略 --out，或通过 --ratio 选一个画幅');
       const ep = flag('ep') ?? '01';
       if (!/^\d+$/.test(ep)) throw new Error('集数须为数字');
+      const ext = episode.resolution && episode.resolution !== '1080p' ? `-${episode.resolution}.mp4` : '.mp4';
       const outputs = selectedRatios.map(ratio => ({
         ratio, target: destination ? resolve(destination) : join(outputRoot, prefs.track, series,
-          artifactName({title: flag('title') ?? episode.title, ep, ratio})),
+          artifactName({title: flag('title') ?? episode.title, ep, ratio, ext})),
       }));
       const workDir = await mkdtemp(join(tmpdir(), 'woframe-render-'));
       try {
@@ -272,7 +275,7 @@ async function main([command, first, second]) {
       return;
     }
     default:
-      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
+      throw new Error('用法：woframe.mjs doctor [--track=] | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--ratio=] [--resolution=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
   }
 }
 

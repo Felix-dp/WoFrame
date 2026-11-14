@@ -42,7 +42,7 @@ function Connector({horizontal, symbol, show, size, accent}) {
   </div>;
 }
 
-export function MotionBoard({scene, frame, themed, settledTitle = false, previous}) {
+export function MotionBoard({scene, frame, themed, settledTitle = false, previous, children}) {
   const {width, height, fps} = useVideoConfig();
   const portrait = height > width * 1.2;
   const scale = Math.min(width, height);
@@ -57,7 +57,7 @@ export function MotionBoard({scene, frame, themed, settledTitle = false, previou
   const compact = (row && beats.length > 2) || (beats.length > 3 && (height / width < 1.6 || pip));
   const size = scale * (compact ? 0.061 : 0.076);
   const {background, border, text: foreground, accent, surface} = themed;
-  const panel = Boolean(beats.length || pip);
+  const panel = Boolean(beats.length || pip || children);
   const connected = layout === 'steps' || Boolean(relation);
   return <AbsoluteFill style={{background, color: foreground,
     backgroundImage: `radial-gradient(ellipse at 18% 12%, ${accent}17, transparent 48%)`,
@@ -79,7 +79,7 @@ export function MotionBoard({scene, frame, themed, settledTitle = false, previou
           margin: panel ? `${size * 0.25}px 0 0` : `${size * 0.32}px auto 0`,
           background: accent, transform: `scaleX(${settledTitle ? 1 : underline})`, transformOrigin: 'left'}}/>
       </div>}
-      {beats.length > 0 && <div style={{display: 'flex', flexDirection: row ? 'row' : 'column', alignItems: row ? 'stretch' : undefined,
+      {children ?? (beats.length > 0 && <div style={{display: 'flex', flexDirection: row ? 'row' : 'column', alignItems: row ? 'stretch' : undefined,
         gap: connected ? size * 0.92 : size * 0.29,
         maxWidth: '100%'}}>
         {beats.map((beat, index) => {
@@ -105,7 +105,7 @@ export function MotionBoard({scene, frame, themed, settledTitle = false, previou
               pressProgress={pressProgress} size={size} themed={themed}/>
           </div>;
         })}
-      </div>}
+      </div>)}
     </div>
   </AbsoluteFill>;
 }

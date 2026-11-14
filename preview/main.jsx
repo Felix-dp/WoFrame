@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Player} from '@remotion/player';
-import {episodeComposition, isEpisodePath, validateEpisode} from './episode.mjs';
+import {episodeComposition, isEpisodePath, resolutions, validateEpisode} from './episode.mjs';
 import {EpisodeVideo} from './EpisodeVideo.jsx';
 import {PublishingSetup} from './PublishingSetup.jsx';
 import {publishingPlan} from './publishing.mjs';
@@ -14,6 +14,7 @@ function Preview({project, url, publishing}) {
   const exportRequest = useRef(null);
   useEffect(() => () => exportRequest.current?.abort(), []);
   const {width, height, durationInFrames, fps} = episodeComposition(project);
+  const outputSize = width + '×' + height;
   useEffect(() => () => { if (mp4) URL.revokeObjectURL(mp4); }, [mp4]);
 
   async function exportEpisode() {
@@ -43,7 +44,7 @@ function Preview({project, url, publishing}) {
   }
   return <section style={{margin: '2rem auto', maxWidth: `${36 * width / height}rem`, padding: '0 1rem', fontFamily: 'system-ui'}}>
     <h1>{project.title}</h1>
-    <p>{project.ratio} · {project.scenes.length} 镜 · {(durationInFrames / fps).toFixed(1)} 秒 · {width}×{height}</p>
+    <p>{project.ratio} · {project.scenes.length} 镜 · {(durationInFrames / fps).toFixed(1)} 秒 · {outputSize}</p>
     {error && <p role="alert">{error}</p>}
     <Player component={EpisodeVideo} inputProps={{project, assetBase: url.href, onError: setError}}
       compositionWidth={width} compositionHeight={height}
@@ -56,7 +57,7 @@ function Preview({project, url, publishing}) {
       {mp4 && <>
         <h2>成片回看</h2>
         <video controls src={mp4} style={{width: '100%'}} />
-        <a href={mp4} download={project.title.replace(/[\\/:*?"<>|]/g, '_') + (publishing ? '-' + width + 'x' + height : '') + '.mp4'}>下载此 MP4</a>
+        <a href={mp4} download={project.title.replace(/[\\/:*?"<>|]/g, '_') + (publishing ? '-' + outputSize.replace('×', 'x') : '') + (project.resolution === '1080p' ? '' : '-' + project.resolution) + '.mp4'}>下载此 MP4</a>
       </>}
     </section>}
   </section>;
@@ -64,6 +65,7 @@ function Preview({project, url, publishing}) {
 
 function EpisodePage({project, url, initialTargets}) {
   const [targets, setTargets] = useState(initialTargets);
+  const [resolution, setResolution] = useState(project.resolution ?? '1080p');
   const [selectedRatio, setSelectedRatio] = useState(null);
   const plan = publishingPlan(targets);
   const ratio = plan.videos.find(video => video.ratio === selectedRatio)?.ratio
@@ -73,7 +75,7 @@ function EpisodePage({project, url, initialTargets}) {
     const {duration, ...config} = project;
     const publishingTargets = plan.destinations.map(({profile, videoRatio, coverRatios}) =>
       ({profile, videoRatio, coverRatios}));
-    const file = new Blob([JSON.stringify({...config, publishingTargets}, null, 2) + '\n'],
+    const file = new Blob([JSON.stringify({...config, resolution, publishingTargets}, null, 2) + '\n'],
       {type: 'application/json'});
     const source = URL.createObjectURL(file);
     const link = document.createElement('a');
@@ -86,9 +88,12 @@ function EpisodePage({project, url, initialTargets}) {
   return <main style={{fontFamily: 'system-ui, sans-serif'}}>
     <div style={{maxWidth: '46rem', margin: '2rem auto', padding: '0 1rem'}}>
       <PublishingSetup plan={plan} ratio={ratio} onTargets={setTargets} onRatio={setSelectedRatio} />
-      {targets.length > 0 && <button type="button" onClick={downloadProject}>保存发布配置 JSON</button>}
+      <label>导出画质 <select value={resolution} onChange={event => setResolution(event.target.value)}>
+        {resolutions.map(value => <option key={value}>{value}</option>)}
+      </select></label>
+      <button type="button" onClick={downloadProject}>保存发布配置 JSON</button>
     </div>
-    <Preview key={ratio} project={{...project, ratio}} url={url} publishing={targets.length > 0} />
+    <Preview key={ratio + resolution} project={{...project, ratio, resolution}} url={url} publishing={targets.length > 0} />
   </main>;
 }
 
