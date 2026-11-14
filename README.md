@@ -12,6 +12,7 @@
   <img alt="agent" src="https://img.shields.io/badge/Agent-Codex%20%7C%20Claude%20Code-1F3A5F?style=flat-square">
   <img alt="platform" src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-BE6440?style=flat-square">
   <img alt="BoHack" src="https://img.shields.io/badge/BoHack-2026.11-8C978D?style=flat-square">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-2F6B4F?style=flat-square"></a>
 </p>
 
 ---
@@ -154,6 +155,6 @@ WoFrame/
 
 ## License
 
-WoFrame 的原创代码和工作流模板采用 [MIT 许可证](LICENSE)。在保留版权和许可声明的前提下，你可以使用、修改、分发和商用。
+WoFrame 的原创代码和工作流模板采用 [MIT 许可证](LICENSE)，允许使用、修改、分发和商用。分发代码或其主要部分时，请保留原版权声明和 MIT 许可文本。
 
 Remotion 等第三方依赖适用各自的许可。运行或分发使用 Remotion 的项目时，请查阅 [Remotion 许可条款](https://github.com/remotion-dev/remotion/blob/v4.0.543/LICENSE.md)。仓库中的项目品牌、宣传海报和演示图片仅供展示，另有标注的素材以其标注为准。
