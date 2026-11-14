@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/assets/banner.jpg" alt="WoFrame 一帧 · 从一句话，到一段知识短片" width="100%">
+  <img src="docs/assets/banner.jpg" alt="WoFrame 一帧 · 从一句话，到一段知识视频" width="100%">
 </p>
 
 <p align="center">
-  <b>从一句话，到一段知识短片。</b><br>
-  面向知识短视频创作者的 Agent 工作流，覆盖选题、写稿、配音和成片
+  <b>从一句话，到一段知识视频。</b><br>
+  面向知识视频创作者的 Agent 工作流，覆盖选题、写稿、配音和成片
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 
 做系列视频有两笔成本。整段调用视频生成模型时，费用会随生成时长和重做次数增加。连更时，已经确定的画面版式、字幕、封面和声线，也常常需要逐集重新设置。
 
-**WoFrame（一帧）** 是面向知识短视频创作者的 Agent 工作流。你可以带着选题、已有文稿或录好的口播开始，和 Agent 逐步确认路线、脚本、素材和配音，再预览成片。路线Ⅱ和Ⅲ用插图、图解、声轨和实拍素材在本地合成视频。改文稿、字幕或插图后，可以重用已有素材和分镜设置重新渲染。
+**WoFrame（一帧）** 是面向知识视频创作者的 Agent 工作流。你可以带着选题、已有文稿或录好的口播开始，和 Agent 逐步确认路线、脚本、素材和配音，再预览成片。可以按内容需要和发布平台确定视频时长。路线Ⅱ和Ⅲ用插图、图解、声轨和实拍素材在本地合成视频。改文稿、字幕或插图后，可以重用已有素材和分镜设置重新渲染。
 
 ## 三条创作路线
 
@@ -194,7 +194,7 @@ WoFrame/
 **Next Level** · BoHack 2026.11
 
 <p align="center">
-  <img src="docs/assets/poster.jpg" alt="一帧 · 团队宣传海报" width="420">
+  <img src="docs/assets/poster.jpg" alt="一帧 · BoHack 2026 参赛海报" width="420">
 </p>
 
 ## License
