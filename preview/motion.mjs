@@ -4,6 +4,7 @@ export const pipShapes = ['rounded', 'circle'];
 export const palettes = {
   ink: {background: '#101923', surface: '#192734', border: '#3a504f', text: '#f6f3e9', muted: '#c0d0cb', accent: '#8fe1ba'},
   paper: {background: '#ede8dc', surface: '#f9f6ef', border: '#d5cbb8', text: '#242d2c', muted: '#495a54', accent: '#245c49'},
+  renew: {background: '#f5f2e9', surface: '#fffaf0', border: '#ded7cb', text: '#26231f', muted: '#665f55', accent: '#bd4826'},
 };
 
 export function validateMotion(scene) {
@@ -61,9 +62,9 @@ export function isBoard(scene) {
   return !scene.video || scene.motion?.speaker === 'pip';
 }
 
-export function speakerLayout(width, height) {
+export function speakerLayout(width, height, sizeMode) {
   const portrait = height > width * 1.2;
-  const size = width * (portrait ? 0.29 : 0.2);
+  const size = width * (sizeMode === 'small' ? (portrait ? 0.23 : 0.14) : (portrait ? 0.29 : 0.2));
   const right = width * 0.08;
   const bottom = height * (portrait ? 0.14 : 0.22);
   const gap = Math.min(width, height) * 0.04;

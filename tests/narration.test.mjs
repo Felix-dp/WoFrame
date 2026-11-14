@@ -54,6 +54,12 @@ test('failed synthesis preserves the project and removes the incomplete take', a
 });
 
 
+test('Mandarin narration requires a selected voice when the series has none', async t => {
+  const {file, read, original} = await fixture(t);
+  await assert.rejects(narrateEpisode(file, {sample: true, generate}), /voices --language=zh-CN/);
+  assert.equal(await read(), original);
+});
+
 test('Qwen voices match the project language and the default can be overridden',
   {skip: !hasLocalQwen}, async t => {
     const {file, project} = await fixture(t);

@@ -59,7 +59,8 @@ export function sceneTiming(episode, projectDir, {fit = false} = {}) {
 }
 
 export function projectAssets(episode) {
-  return new Set([episode.bgm, ...episode.scenes.flatMap(scene => [scene.video, scene.audio])].filter(Boolean));
+  return new Set([episode.bgm, ...episode.scenes.flatMap(scene =>
+    [scene.video, scene.audio, scene.illustration, scene.collage?.cover, scene.collage?.portrait, scene.collage?.illustration])].filter(Boolean));
 }
 
 export async function checkAssets(episode, projectDir) {

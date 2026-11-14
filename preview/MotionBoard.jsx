@@ -42,7 +42,7 @@ function Connector({horizontal, symbol, show, size, accent}) {
   </div>;
 }
 
-export function MotionBoard({scene, frame, themed, settledTitle = false, previous, children}) {
+export function MotionBoard({scene, frame, themed, pipSize, settledTitle = false, previous, children}) {
   const {width, height, fps} = useVideoConfig();
   const portrait = height > width * 1.2;
   const scale = Math.min(width, height);
@@ -50,7 +50,7 @@ export function MotionBoard({scene, frame, themed, settledTitle = false, previou
   const motion = scene.motion ?? {};
   const {beats = [], focus, relation, layout = beats.length > 1 ? 'compare' : 'title'} = motion;
   const pip = motion.speaker === 'pip';
-  const speaker = pip ? speakerLayout(width, height) : null;
+  const speaker = pip ? speakerLayout(width, height, pipSize) : null;
   const row = !portrait && layout !== 'title';
   const title = settledTitle ? 1 : Math.max(0.28, reveal(frame, frames, fps, 0, 0.32));
   const underline = reveal(frame, frames, fps, 0.06, 0.36);

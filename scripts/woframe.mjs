@@ -18,7 +18,7 @@ const outputRoot = join(repoRoot, 'output');
 const trackIds = ['traffic', 'vertical', 'persona'];
 const keys = ['track', 'series', 'audience', 'targetSeconds', 'pace', 'platform', 'ratio', 'style',
   'visualStyle', 'coverStyle', 'hostRole', 'staging', 'speech', 'takeRule',
-  'voice', 'narrationVoice', 'bgmStyle', 'captionStyle', 'materialSource', 'pipShape'];
+  'voice', 'narrationVoice', 'bgmStyle', 'captionStyle', 'materialSource', 'pipShape', 'pipSize'];
 const preferences = value => Object.fromEntries(keys.filter(key =>
   ['string', 'number', 'boolean'].includes(typeof value?.[key])).map(key => [key, value[key]]));
 const installed = (name, args) => spawnSync(name, args, {stdio: 'ignore', timeout: 3000}).status === 0;
