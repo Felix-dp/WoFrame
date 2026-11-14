@@ -4,7 +4,7 @@ node_modules/
 
 # 构建与渲染产物
 dist/
-studio/out/
+legacy/studio/out/
 *.log
 
 # 系统与编辑器

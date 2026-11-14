@@ -6,7 +6,6 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "studio": "node studio/server.mjs",
     "preview": "vite --host 127.0.0.1",
     "build:preview": "vite build",
     "woframe": "node scripts/woframe.mjs"
