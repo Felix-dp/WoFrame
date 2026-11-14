@@ -32,7 +32,7 @@ node scripts/woframe.mjs handbooks
 - Ⅰ 的 Hypit 产物优先让它直接输出到 `output/traffic/<账号名>/`；只能生成在别处时，用 `deliver` 移过去（是移动，不留副本）：
 
 ```sh
-node scripts/woframe.mjs deliver <Hypit 产物> --track=traffic --series=<账号名> --ep=01 --title=<标题> --ratio=9x16
+node scripts/woframe.mjs deliver "./hypit-out.mp4" --track=traffic --series=泛流量 --ep=01 --title="今日热点" --ratio=9x16
 ```
 
 - 封面图同样用 `deliver` 搬进同一目录，加 `--cover`。
@@ -105,13 +105,13 @@ node scripts/woframe.mjs deliver <Hypit 产物> --track=traffic --series=<账号
 先跑 `node scripts/woframe.mjs check <项目.json>`。如果 `warnings` 报音画时长对不上，跑 `fit --write` 按音频实际时长重算每镜 `frames`，再 `check` 一次：
 
 ```sh
-node scripts/woframe.mjs fit public/work/<项目>/episode.json --write
+node scripts/woframe.mjs fit "public/work/<项目>/episode.json" --write
 ```
 
 需要逐镜核对时用 `npm run preview` 看字幕、音画和报错。确认后 `render` 出片：
 
 ```sh
-node scripts/woframe.mjs render public/work/<项目>/episode.json --ep=01
+node scripts/woframe.mjs render "public/work/<项目>/episode.json" --ep=01
 ```
 
 成片直接写到 `output/<track>/<系列名>/`。**先看再定稿**：用户在当地播放验收，通过才算完成；不通过就改 JSON 再 render 一次。

@@ -35,6 +35,10 @@ function artifactName({title, ep, ratio, cover, ext}) {
     (cover ? '-cover' : '') + (ext || '.mp4');
 }
 
+function defaultSeries(track, title) {
+  return track === 'traffic' ? '泛流量' : clean(title);
+}
+
 function seriesName(prefs, fallback) {
   const value = clean(prefs.series) || clean(fallback);
   if (!value) throw new Error('需要一个系列名或项目标题来命名，先给这一集起个名');
@@ -68,6 +72,7 @@ function handbookTarget(prefs, fallback) {
 
 async function listHandbooks() {
   const rows = [];
+  const skipped = [];
   for (const track of trackIds) {
     const names = (await readdir(join(handbooksRoot, track)).catch(() => []))
       .filter(name => name.endsWith('.json')).sort();
@@ -77,14 +82,15 @@ async function listHandbooks() {
       try {
         data = await read(file);
       } catch {
-        throw new Error('Handbook 读取失败：' + relative(repoRoot, file));
+        skipped.push({file: relative(repoRoot, file), reason: 'JSON 读取失败'});
+        continue;
       }
       rows.push({track, series: data.preferences?.series ?? name.slice(0, -5),
         updatedAt: data.updatedAt ?? null, preferences: data.preferences ?? {},
         file: relative(repoRoot, file)});
     }
   }
-  return rows;
+  return {rows, skipped};
 }
 
 async function main([command, first, second]) {
@@ -106,6 +112,7 @@ async function main([command, first, second]) {
       return;
     }
     case 'check': {
+      if (!await exists(first)) throw new Error('找不到项目文件：' + first);
       const episode = validateEpisode(await read(first));
       publishingPlan(episode.publishingTargets ?? []);
       const files = new Set([episode.bgm, ...episode.scenes.flatMap(scene => [scene.video, scene.audio])]);
@@ -150,13 +157,15 @@ async function main([command, first, second]) {
       print({ok: true, fps, seconds: total / fps, written: has('write') && changes.length > 0, changes});
       return;
     }
-    case 'handbooks':
-      print({handbooks: await listHandbooks()});
+    case 'handbooks': {
+      const {rows, skipped} = await listHandbooks();
+      print({handbooks: rows, skipped});
       return;
+    }
     case 'find-handbook': {
       const query = String(first ?? '').trim();
       if (!query) throw new Error('用法：find-handbook <系列名或赛道>');
-      const rows = await listHandbooks();
+      const {rows} = await listHandbooks();
       if (!rows.length) throw new Error('handbooks 目录还是空的，从第一集开始沉淀');
       const exact = rows.filter(row => row.series === query || row.track === query);
       const hits = exact.length ? exact : rows.filter(row => (row.track + row.series).includes(query));
@@ -168,7 +177,7 @@ async function main([command, first, second]) {
       if (second) throw new Error('save-handbook 按赛道和系列名自动落盘，不再接收路径参数');
       const episode = await read(first);
       const incoming = preferences({...episode.preferences, ...(episode.ratio && {ratio: episode.ratio})});
-      const {track, series, file} = handbookTarget(incoming, episode.title);
+      const {track, series, file} = handbookTarget(incoming, defaultSeries(incoming.track, episode.title));
       const previous = await exists(file) ? ((await read(file)).preferences ?? {}) : {};
       const prefs = preferences({...previous, ...incoming, track, series});
       await mkdir(dirname(file), {recursive: true});
@@ -189,7 +198,7 @@ async function main([command, first, second]) {
       const episode = validateEpisode(await read(first));
       const prefs = episode.preferences ?? {};
       if (!trackIds.includes(prefs.track)) throw new Error('render 需要 project.preferences.track，先确认用户赛道');
-      const series = seriesName(prefs, episode.title);
+      const series = seriesName(prefs, defaultSeries(prefs.track, episode.title));
       const target = flag('out') ? resolve(flag('out')) : join(outputRoot, prefs.track, series,
         artifactName({title: flag('title') ?? episode.title, ep: flag('ep') ?? '01', ratio: episode.ratio}));
       await mkdir(dirname(target), {recursive: true});
@@ -198,7 +207,16 @@ async function main([command, first, second]) {
         const [{bundle}, {selectComposition, renderMedia}] = await Promise.all([
           import('@remotion/bundler'), import('@remotion/renderer')]);
         const entryPoint = fileURLToPath(new URL('../preview/render-root.jsx', import.meta.url));
-        const serveUrl = await bundle({entryPoint, publicDir: dirname(resolve(first)), outDir: join(workDir, 'bundle')});
+        const assetsDir = join(workDir, 'assets');
+        const projectDir = dirname(resolve(first));
+        const media = new Set([episode.bgm,
+          ...episode.scenes.flatMap(scene => [scene.video, scene.audio])].filter(Boolean));
+        for (const name of media) {
+          const target = join(assetsDir, name);
+          await mkdir(dirname(target), {recursive: true});
+          await copyFile(join(projectDir, name), target);
+        }
+        const serveUrl = await bundle({entryPoint, publicDir: assetsDir, outDir: join(workDir, 'bundle')});
         const inputProps = {project: episode};
         const browserExecutable = process.env.WOFRAME_CHROME || undefined;
         const composition = await selectComposition({serveUrl, id: 'WoFrameEpisode', inputProps, browserExecutable});

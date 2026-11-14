@@ -86,10 +86,12 @@ node scripts/woframe.mjs doctor
 ### 4. 一条片子会走过的命令
 
 ```bash
-node scripts/woframe.mjs check public/work/<项目>/episode.json   # 校验素材与时间轴
-node scripts/woframe.mjs fit   public/work/<项目>/episode.json --write  # 音画对不齐时重算帧数
-node scripts/woframe.mjs render public/work/<项目>/episode.json --ep=01 # 出片
-node scripts/woframe.mjs save-handbook public/work/<项目>/episode.json  # 第一集沉淀系列
+PROJECT="public/work/<项目>/episode.json"
+
+node scripts/woframe.mjs check "$PROJECT"             # 校验素材与时间轴
+node scripts/woframe.mjs fit   "$PROJECT" --write     # 音画对不齐时重算帧数
+node scripts/woframe.mjs render "$PROJECT" --ep=01    # 出片
+node scripts/woframe.mjs save-handbook "$PROJECT"     # 第一集沉淀系列
 ```
 
 产物直接落在：

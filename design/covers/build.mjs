@@ -47,7 +47,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const args = parse(argv);
     const style = args.style ?? argv[0];
     const format = args.format ?? '16x9';
-    const out = resolve(args.out ?? ('samples/' + style + '-' + format + '.png'));
+    const out = args.out ? resolve(args.out) : resolve(here, 'samples', style + '-' + format + '.png');
     console.log('rendered', render({style, format, out, text: args.text}));
   } else {
     for (const style of styles) {

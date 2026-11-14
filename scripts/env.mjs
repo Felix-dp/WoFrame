@@ -141,7 +141,7 @@ export function installMissing(report) {
       throw new Error('Node.js 版本不够，请先升级到 ' + loadRequirements().node);
     }
     if (row.id === 'npm') {
-      execFileSync('npm', ['install'], {cwd: repoRoot, stdio: 'inherit'});
+      execFileSync('npm install', {cwd: repoRoot, stdio: 'inherit', shell: true});
       done.push('npm install');
       continue;
     }
