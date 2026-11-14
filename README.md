@@ -154,4 +154,6 @@ WoFrame/
 
 ## License
 
-本仓库为 BoHack 2026.11 参赛作品，暂未开源。
+WoFrame 的原创代码和工作流模板采用 [MIT 许可证](LICENSE)。在保留版权和许可声明的前提下，你可以使用、修改、分发和商用。
+
+Remotion 等第三方依赖适用各自的许可。运行或分发使用 Remotion 的项目时，请查阅 [Remotion 许可条款](https://github.com/remotion-dev/remotion/blob/v4.0.543/LICENSE.md)。仓库中的项目品牌、宣传海报和演示图片仅供展示，另有标注的素材以其标注为准。
