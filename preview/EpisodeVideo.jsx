@@ -3,17 +3,41 @@ import {AbsoluteFill, Audio, Html5Video, Sequence, staticFile, useCurrentFrame, 
 import {MotionBoard} from './MotionBoard.jsx';
 import {ease, isBoard, palettes, resizesSpeaker, reveal, sceneTransition, speakerLayout, videoTimeline} from './motion.mjs';
 
+function CueCards({cue, frame, size, steady, themed}) {
+  const enter = steady ? 1 : ease(frame, cue.frame, 8);
+  return <div style={{display: 'grid', gridTemplateColumns: `repeat(${cue.cards.length}, minmax(0, 1fr))`,
+    gap: size * 0.22, width: '100%'}}>
+    {cue.cards.map((card, index) => {
+      const latest = index === cue.cards.length - 1;
+      return <div key={index} style={{padding: size * 0.25, borderRadius: size * 0.22,
+        display: 'grid', placeItems: 'center', minHeight: size * 1.65, overflowWrap: 'anywhere',
+        visibility: card === null ? 'hidden' : undefined, color: latest ? themed.accent : themed.text,
+        background: themed.surface, border: `2px solid ${latest && !steady ? themed.accent : themed.border}`,
+        opacity: latest ? 0.4 + 0.6 * enter : 1, transform: latest ? `translateY(${(1 - enter) * size * 0.26}px)` : undefined}}>
+        {card}
+      </div>;
+    })}
+  </div>;
+}
+
 function EpisodeScene({scene, previous, themed, asset, onError, index}) {
   const frame = useCurrentFrame();
   const {width, height, fps} = useVideoConfig();
   const portrait = height > width * 1.2;
   const scale = Math.min(width, height);
+  const captionCue = scene.cues?.findLast(cue => cue.frame <= frame);
+  const caption = captionCue?.text ?? scene.caption;
+  const emphasis = captionCue?.emphasis;
+  const emphasisStart = emphasis ? caption.indexOf(emphasis) : -1;
+  const text = scene.cues?.findLast(cue => cue.frame <= frame && cue.screenText)?.screenText ?? scene.text;
+  const cardCue = scene.cues?.findLast(cue => cue.frame <= frame && cue.cards);
+  const boardScene = text === scene.text ? scene : {...scene, text};
   const transition = sceneTransition(previous, scene, fps);
   const crossing = frame < transition.frames;
   const progress = crossing ? ease(frame + 1, 0, transition.frames) : 1;
   const moving = transition.type === 'slide' && crossing;
   const pip = scene.motion?.speaker === 'pip';
-  const sharedTitle = previous && previous.text === scene.text && isBoard(previous);
+  const sharedTitle = previous && previous.text === text && isBoard(previous);
   const enter = reveal(frame + 1, scene.frames, fps, 0, 0.28);
   const resizing = resizesSpeaker(previous, scene);
   // A shrinking video sweeps across the layout before it reaches its dock.
@@ -28,19 +52,31 @@ function EpisodeScene({scene, previous, themed, asset, onError, index}) {
       {crossing && compatibleBoards && <MotionBoard scene={previous} frame={previous.frames - 1} themed={themed}/>}
       <AbsoluteFill style={{opacity: boardOpacity, transform: moving
         ? `translateX(${(pip ? -4 : 4) * (1 - progress)}%)` : undefined}}>
-        <MotionBoard scene={scene} frame={frame} themed={themed} settledTitle={sharedTitle} previous={sharedTitle ? previous : undefined}/>
+        <MotionBoard scene={boardScene} frame={frame} themed={themed} settledTitle={sharedTitle}
+          previous={sharedTitle ? previous : undefined}>
+          {cardCue && <CueCards cue={cardCue} frame={frame} size={scale * 0.05}
+            steady={scene.cueStyle === 'steady'} themed={themed}/>}
+        </MotionBoard>
       </AbsoluteFill>
     </>}
     {scene.audio && <Audio src={asset(scene.audio)} onError={() => onError?.(`分镜 ${index + 1} 的音频加载失败`)}/>}
-    {scene.text && !isBoard(scene) && <div style={{
+    {text && !isBoard(scene) && <div style={{
       position: 'absolute', zIndex: 2, left: '7%', top: '10%', maxWidth: '74%', padding: '0.6em 0.8em',
       borderRadius: scale * 0.015, background: '#101923e8', color: '#fff', fontSize: scale * 0.05,
       fontWeight: 700, opacity: enter, transform: `translateY(${(1 - enter) * 16}px)`,
-    }}>{scene.text}</div>}
-    {scene.caption && <div style={{position: 'absolute', zIndex: 2, bottom: portrait ? '7%' : '8%', left: '7%', right: '7%', textAlign: 'center'}}>
+    }}>{text}</div>}
+    {cardCue && !isBoard(scene) && <div style={{position: 'absolute', zIndex: 2, top: '24%', left: '8%', right: '8%',
+      fontSize: scale * 0.042, fontWeight: 650}}>
+      <CueCards cue={cardCue} frame={frame} size={scale * 0.05} steady={scene.cueStyle === 'steady'} themed={themed}/>
+    </div>}
+    {caption && <div style={{position: 'absolute', zIndex: 2, bottom: portrait ? '7%' : '8%', left: '7%', right: '7%', textAlign: 'center'}}>
       <span style={{display: 'inline-block', maxWidth: '100%', padding: '0.24em 0.6em', color: '#fff',
         background: '#101923ed', borderRadius: '0.24em', fontSize: scale * 0.039, lineHeight: 1.2,
-        fontWeight: 550, textWrap: 'balance', overflowWrap: 'anywhere'}}>{scene.caption}</span>
+        fontWeight: 550, textWrap: 'balance', overflowWrap: 'anywhere'}}>{emphasisStart < 0 ? caption : <>
+        {caption.slice(0, emphasisStart)}
+        <mark style={{color: '#e8ffaf', background: '#536d36', borderRadius: '0.15em', padding: '0 0.12em'}}>{emphasis}</mark>
+        {caption.slice(emphasisStart + emphasis.length)}
+      </>}</span>
     </div>}
   </>;
 }
@@ -84,7 +120,7 @@ export function EpisodeVideo({project, assetBase, onError}) {
   };
   const themed = palettes[project.theme ?? 'ink'];
   const {shots, runs} = videoTimeline(project.scenes);
-  return <AbsoluteFill style={{background: themed.background, fontFamily: 'system-ui, sans-serif', overflow: 'hidden'}}>
+  return <AbsoluteFill lang={project.language} style={{background: themed.background, fontFamily: 'system-ui, sans-serif', overflow: 'hidden'}}>
     {project.bgm && <Audio src={asset(project.bgm)} volume={0.15} loop onError={() => onError?.('背景音乐加载失败')}/>}
     {shots.map(({scene, previous, from, index}) => <Sequence key={index} from={from} durationInFrames={scene.frames} layout="none">
       <EpisodeScene scene={scene} previous={previous} themed={themed}

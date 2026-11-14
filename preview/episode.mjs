@@ -10,11 +10,43 @@ export const episodeSizes = {
   '1:1': {width: 1080, height: 1080},
 };
 
+export const resolutions = ['480p', '720p', '1080p'];
+
+export function resolutionScale(resolution = '1080p') {
+  if (!resolutions.includes(resolution)) throw new Error('画质须为 480p、720p 或 1080p');
+  return Number.parseInt(resolution, 10) / 1080;
+}
+
 function localAsset(value) {
   if (!value) return;
   if (typeof value !== 'string' || !value.split('/').every(part =>
     part !== '.' && part !== '..' && /^[\p{L}\p{N} _.-]+$/u.test(part))) {
     throw new Error(`素材必须是项目目录内的相对路径：${value}`);
+  }
+}
+
+function validateCues(cues, frames, steady) {
+  if (cues === undefined) return;
+  if (!Array.isArray(cues) || cues.length === 0) throw new Error('cues 须为非空数组');
+  let previous = -1;
+  for (const cue of cues) {
+    if (!Number.isInteger(cue?.frame) || cue.frame <= previous || cue.frame >= frames ||
+        typeof cue.text !== 'string' || !cue.text.trim()) {
+      throw new Error('标注须有文字和镜内帧号，且按从零开始的帧号递增');
+    }
+    if (cue.emphasis !== undefined && (typeof cue.emphasis !== 'string' ||
+        !cue.emphasis.trim() || !cue.text.includes(cue.emphasis))) {
+      throw new Error('标注的 emphasis 须是 text 中的一段文字');
+    }
+    if (cue.screenText !== undefined && (typeof cue.screenText !== 'string' || !cue.screenText.trim())) {
+      throw new Error('标注的 screenText 须为非空文字');
+    }
+    if (cue.cards !== undefined && (!Array.isArray(cue.cards) || cue.cards.length < 1 || cue.cards.length > 4 ||
+        cue.cards.some(card => !(steady && card === null) &&
+          (typeof card !== 'string' || !card.trim() || card.length > 64)))) {
+      throw new Error('标注的 cards 须为 1–4 项短文字');
+    }
+    previous = cue.frame;
   }
 }
 
@@ -24,6 +56,8 @@ export function validateEpisode(project) {
   if (typeof title !== 'string' || !title.trim() || !['talking-head', 'faceless'].includes(route)) {
     throw new Error('请填写标题，选择 talking-head 或 faceless');
   }
+  resolutionScale(project.resolution);
+  if (project.language != null && !['zh-CN', 'en-US', 'ja-JP'].includes(project.language)) throw new Error('项目语言须为 zh-CN、en-US 或 ja-JP');
   const track = project.preferences?.track;
   if (track != null && !tracks.includes(track)) throw new Error(`赛道须为 ${tracks.join('、')}`);
   if (project.preferences?.pipShape != null && !pipShapes.includes(project.preferences.pipShape)) {
@@ -42,6 +76,8 @@ export function validateEpisode(project) {
   scenes.forEach((scene, index) => {
     try {
       if (!Number.isInteger(scene?.frames) || scene.frames < 1) throw new Error('帧数必须是正整数');
+      if (scene.cueStyle !== undefined && scene.cueStyle !== 'steady') throw new Error('未知标注样式');
+      validateCues(scene.cues, scene.frames, scene.cueStyle === 'steady');
       if (route === 'talking-head' && !scene.video) throw new Error('缺少口播视频');
       if (scene.videoStartFrame != null &&
           (!scene.video || !Number.isSafeInteger(scene.videoStartFrame) || scene.videoStartFrame < 0 ||
@@ -64,8 +100,11 @@ export function validateEpisode(project) {
 }
 
 export function episodeComposition(project) {
+  const {width, height} = episodeSizes[project.ratio];
+  const scale = resolutionScale(project.resolution);
   return {
-    ...episodeSizes[project.ratio],
+    width: Math.ceil(width * scale / 2) * 2,
+    height: Math.ceil(height * scale / 2) * 2,
     durationInFrames: project.duration,
     fps: project.fps,
   };

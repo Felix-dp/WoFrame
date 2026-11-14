@@ -116,9 +116,15 @@ output/
 | `apply-handbook <handbook> <项目.json>` | 把系列默认值合入新一集 |
 | `check <项目.json>` | 校验素材、时间轴与画幅 |
 | `fit <项目.json> [--write]` | 按独立旁白或口播原片时长重算分镜帧数 |
-| `render <项目.json> [--ep=] [--ratio=] [--out=]` | 渲染所有发布画幅，或指定一个画幅。单画幅可指定输出文件 |
+| `render <项目.json> [--ep=] [--ratio=] [--resolution=] [--out=]` | 渲染所有发布画幅，或指定一个画幅。单画幅可指定输出文件 |
 | `deliver <文件> --track= --series= --ep= --title=` | 把外部产物（如 Hypit 成片、封面）移入 output |
 | `npm run preview` | 逐镜审片（可选，不参与出片） |
+
+导出支持 `480p`、`720p`、`1080p`。可在预览页选择画质，也可以在项目 JSON 中设置 `resolution`。命令行 `--resolution` 优先，默认 1080p。项目 JSON 的 `language` 用来标记内容语言，支持 `zh-CN`、`en-US`、`ja-JP`。
+
+### 随旁白标出重点
+
+分镜的 `cues` 可按镜内帧号切换字幕和画面。每项填写 `frame` 和 `text`，可用 `emphasis` 高亮字幕中的一段文字，用 `screenText` 更新画面标题，用 `cards` 更新讲解卡片。设置 `"cueStyle":"steady"` 可让卡片留在固定位置，并用 `null` 预留空位。参考[带旁白的示例](public/examples/baoyan/episode.json)。
 
 ## 目录结构
 
