@@ -260,8 +260,9 @@ async function main([command, first, second]) {
           artifactName({title: flag('title') ?? episode.title, ep, ratio, ext})),
       }));
       const workDir = await mkdtemp(join(tmpdir(), 'woframe-render-'));
+      let browser;
       try {
-        const [{bundle}, {selectComposition, renderMedia}] = await Promise.all([
+        const [{bundle}, {selectComposition, renderMedia, openBrowser}] = await Promise.all([
           import('@remotion/bundler'), import('@remotion/renderer')]);
         const entryPoint = fileURLToPath(new URL('../preview/render-root.jsx', import.meta.url));
         const assetsDir = join(workDir, 'assets');
@@ -272,12 +273,12 @@ async function main([command, first, second]) {
           await copyFile(join(projectDir, name), target);
         }
         const serveUrl = await bundle({entryPoint, publicDir: assetsDir, outDir: join(workDir, 'bundle')});
-        const browserExecutable = process.env.WOFRAME_CHROME || undefined;
+        browser = await openBrowser('chrome', {browserExecutable: process.env.WOFRAME_CHROME || undefined});
         for (const output of outputs) {
           const inputProps = {project: {...episode, ratio: output.ratio}};
-          const composition = await selectComposition({serveUrl, id: 'WoFrameEpisode', inputProps, browserExecutable});
+          const composition = await selectComposition({serveUrl, id: 'WoFrameEpisode', inputProps, puppeteerInstance: browser});
           output.rendered = join(workDir, output.ratio.replace(':', 'x') + '.mp4');
-          await renderMedia({serveUrl, composition, inputProps, browserExecutable, codec: 'h264',
+          await renderMedia({serveUrl, composition, inputProps, puppeteerInstance: browser, codec: 'h264',
             outputLocation: output.rendered, concurrency: 2, pixelFormat: 'yuv420p'});
         }
         for (const {target, rendered} of outputs) {
@@ -285,7 +286,11 @@ async function main([command, first, second]) {
           await copyFile(rendered, target);
         }
       } finally {
-        await rm(workDir, {recursive: true, force: true});
+        try {
+          await browser?.close({silent: true});
+        } finally {
+          await rm(workDir, {recursive: true, force: true});
+        }
       }
       const files = outputs.map(({ratio, target}) => ({ratio, file: relative(repoRoot, target)}));
       print({ok: true, ...(files.length === 1 && {file: files[0].file}), files});
