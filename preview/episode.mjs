@@ -8,6 +8,13 @@ export const episodeSizes = {
   '1:1': {width: 1080, height: 1080},
 };
 
+export const resolutions = ['480p', '720p', '1080p'];
+
+export function resolutionScale(resolution = '1080p') {
+  if (!resolutions.includes(resolution)) throw new Error('画质须为 480p、720p 或 1080p');
+  return Number.parseInt(resolution, 10) / 1080;
+}
+
 function localAsset(value) {
   if (!value) return;
   if (typeof value !== 'string' || !value.split('/').every(part =>
@@ -22,6 +29,8 @@ export function validateEpisode(project) {
   if (typeof title !== 'string' || !title.trim() || !['talking-head', 'faceless'].includes(route)) {
     throw new Error('请填写标题，选择 talking-head 或 faceless');
   }
+  resolutionScale(project.resolution);
+  if (project.language != null && !['zh-CN', 'en-US', 'ja-JP'].includes(project.language)) throw new Error('项目语言须为 zh-CN、en-US 或 ja-JP');
   const track = project.preferences?.track;
   if (track != null && !tracks.includes(track)) throw new Error(`赛道须为 ${tracks.join('、')}`);
   if (typeof ratio !== 'string' || !Object.hasOwn(episodeSizes, ratio)) {
@@ -52,8 +61,11 @@ export function validateEpisode(project) {
 }
 
 export function episodeComposition(project) {
+  const {width, height} = episodeSizes[project.ratio];
+  const scale = resolutionScale(project.resolution);
   return {
-    ...episodeSizes[project.ratio],
+    width: Math.ceil(width * scale / 2) * 2,
+    height: Math.ceil(height * scale / 2) * 2,
     durationInFrames: project.duration,
     fps: project.fps,
   };

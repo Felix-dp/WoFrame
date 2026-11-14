@@ -1,4 +1,5 @@
 import {buildDraft, directionsFor, inferOpening, localOpening, openingRules, revisionActions, suggest, visualFor} from './draft.mjs';
+import {languages} from './languages.mjs';
 import {download, frame, setupMedia} from './media.mjs';
 
 const get = id => document.getElementById(id);
@@ -10,7 +11,10 @@ let angle = '';
 let chosenTitle = '';
 let topicRequest;
 let draftRequest;
+const languageSelect = get('contentLanguage');
+for (const [id, {label}] of Object.entries(languages)) languageSelect.add(new Option(label, id));
 let draft = state.draft;
+if (draft?.language && Object.hasOwn(languages, draft.language)) languageSelect.value = draft.language;
 let previous = state.previous;
 const renderMedia = setupMedia(get, editedDraft);
 
@@ -50,7 +54,7 @@ async function ask(path, data, signal) {
   const response = await fetch(path, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data),
+    body: JSON.stringify({modelId: get('writingModel').value || undefined, language: languageSelect.value, ...data}),
     signal,
   });
   const payload = await response.json().catch(() => ({}));
@@ -83,7 +87,7 @@ async function selectTopic(name) {
   get('suggestions').replaceChildren();
   get('setup').hidden = true;
   get('angles').hidden = false;
-  renderAngles(directionsFor(name));
+  renderAngles(directionsFor(name, languageSelect.value));
   const status = get('topicStatus');
   status.hidden = false;
   status.textContent = '正在找适合这个主题的讲法…';
@@ -96,7 +100,7 @@ async function selectTopic(name) {
   }
 }
 
-function revisionControls(area, wrapper, draftTopic) {
+function revisionControls(area, wrapper, draftTopic, language) {
   const controls = document.createElement('div');
   controls.className = 'row';
   const result = document.createElement('div');
@@ -111,7 +115,7 @@ function revisionControls(area, wrapper, draftTopic) {
       for (const button of controls.children) button.disabled = true;
       result.textContent = '正在生成改写建议…';
       try {
-        const proposed = await ask('/api/revise', {topic: draftTopic, action, text: original});
+        const proposed = await ask('/api/revise', {topic: draftTopic, action, text: original, language: language ?? 'zh-CN'});
         if (!wrapper.isConnected) return;
         if (!proposed) {
           result.textContent = 'AI 改稿尚未配置，可以直接修改这段文字。';
@@ -149,6 +153,7 @@ function renderDraft() {
     draft.isGenerated ? 'AI 初稿，请校对事实和术语。'
       : draft.isExample ? '示例讲稿，可直接改写。' : '分镜提纲，请补充具体内容。',
     draft.format === 'presenter' ? '真人口播' : '动画讲解',
+    languages[draft.language ?? 'zh-CN']?.label,
     {paper: '白板图解', chalk: '课堂黑板', cards: '简洁卡片'}[draft.style],
   ].join(' · ');
   get('undo').disabled = !previous;
@@ -168,7 +173,7 @@ function renderDraft() {
     area.addEventListener('input', () => renderMedia(editedDraft()));
     label.append(scene.title, area);
     wrapper.append(label);
-    revisionControls(area, wrapper, draft.topic);
+    revisionControls(area, wrapper, draft.topic, draft.language);
     if (draft.format === 'animation') {
       const diagram = document.createElement('label');
       const steps = document.createElement('textarea');
@@ -207,6 +212,7 @@ input.addEventListener('input', event => {
   renderSuggestions();
 });
 input.addEventListener('compositionend', renderSuggestions);
+languageSelect.addEventListener('change', () => { if (topic) selectTopic(topic); });
 get('topicForm').addEventListener('submit', event => {
   event.preventDefault();
   selectTopic(input.value.trim());
@@ -216,7 +222,7 @@ get('generate').addEventListener('click', async () => {
   draftRequest = request;
   const button = get('generate');
   const status = get('generationStatus');
-  const settings = {topic, angle, format: get('format').value, style: get('style').value, keywords: get('keywords').value.trim()};
+  const settings = {topic, angle, language: languageSelect.value, format: get('format').value, style: get('style').value, keywords: get('keywords').value.trim()};
   const opening = state.openingEnabled === false ? undefined : state.opening;
   button.disabled = true;
   status.textContent = '正在写讲稿…';
@@ -232,7 +238,7 @@ get('generate').addEventListener('click', async () => {
   }
   if (request.signal.aborted) return;
   previous = draft;
-  draft = result ?? buildDraft(settings, localOpening(settings.topic, opening));
+  draft = result ?? buildDraft(settings, settings.language === 'zh-CN' ? localOpening(settings.topic, opening) : undefined);
   draft.projectId = crypto.randomUUID();
   try {
     const key = 'woframe-topic-history';
@@ -305,7 +311,10 @@ fetch('/api/status')
     if (!response.ok) throw new Error('Status unavailable');
     return response.json();
   })
-  .then(({aiConfigured, mp4Available}) => {
+  .then(({aiConfigured, mp4Available, models = []}) => {
+    const select = get('writingModel');
+    for (const {id, label} of models) select.add(new Option(label, id));
+    select.disabled = !models.length;
     get('modelStatus').textContent = aiConfigured ? '已配置 AI 写稿' : '本地示例模式';
     get('mp4Option').hidden = !mp4Available;
   })

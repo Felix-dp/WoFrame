@@ -91,6 +91,7 @@ PROJECT="public/work/<项目>/episode.json"
 node scripts/woframe.mjs check "$PROJECT"             # 校验素材与时间轴
 node scripts/woframe.mjs fit   "$PROJECT" --write     # 音画对不齐时重算帧数
 node scripts/woframe.mjs render "$PROJECT" --ep=01    # 出片
+node scripts/woframe.mjs render "$PROJECT" --resolution=720p --ep=01
 node scripts/woframe.mjs save-handbook "$PROJECT"     # 第一集沉淀系列
 ```
 
@@ -112,11 +113,15 @@ output/
 | `handbooks` / `find-handbook <系列名>` | 检索系列沉淀 |
 | `save-handbook <项目.json>` | 沉淀本集确认过的设置（同名合并） |
 | `apply-handbook <handbook> <项目.json>` | 把系列默认值合入新一集 |
-| `check <项目.json>` | 校验素材、时间轴与画幅 |
+| `check <项目.json>` | 校验素材、时间轴、画幅、导出画质和内容语言 |
 | `fit <项目.json> [--write]` | 按音频真实时长重算每镜帧数 |
 | `render <项目.json> [--ep=] [--out=]` | 无头渲染，直接写入 output |
 | `deliver <文件> --track= --series= --ep= --title=` | 把外部产物（如 Hypit 成片、封面）移入 output |
 | `npm run preview` | 逐镜审片（可选，不参与出片） |
+
+导出支持 `480p`、`720p`、`1080p`，按项目画幅缩放。预览页可选画质，也可在项目 JSON 中设 `resolution`。命令行 `--resolution` 优先，默认 1080p。同一项目不同画质可保存在同一目录。
+
+项目 JSON 的 `language` 可标记内容语言，例如 `en-US`。已有字幕、旁白和镜头由项目提供。要生成不同语言的讲稿和旁白，或切换写稿服务，使用[本地工作台](studio/README.md)。
 
 ## 目录结构
 

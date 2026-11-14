@@ -9,6 +9,7 @@ const palettes = {
 export function frame(canvas, topic, scene, style, progress) {
   const context = canvas.getContext('2d');
   const [background, ink, accent] = palettes[style] ?? palettes.paper;
+  context.setTransform(canvas.width / 960, 0, 0, canvas.height / 540, 0, 0);
   context.fillStyle = background;
   context.fillRect(0, 0, 960, 540);
   context.fillStyle = accent;
@@ -89,10 +90,10 @@ export function captionPages(text) {
   });
 }
 
-async function combineTakes(takes, captions, report) {
+async function combineTakes(takes, captions, report, height = 540) {
   const canvas = document.createElement('canvas');
-  canvas.width = 960;
-  canvas.height = 540;
+  canvas.width = Math.round(height * 8 / 9) * 2;
+  canvas.height = height;
   const paint = canvas.getContext('2d');
   const context = new AudioContext();
   const output = context.createMediaStreamDestination();
@@ -133,12 +134,15 @@ async function combineTakes(takes, captions, report) {
         if (pages.length) {
           const fraction = Number.isFinite(video.duration) && video.duration > 0 ? video.currentTime / video.duration : 0;
           const page = pages[Math.max(0, Math.min(pages.length - 1, Math.floor(fraction * pages.length)))];
+          paint.save();
+          paint.scale(canvas.width / 960, canvas.height / 540);
           paint.fillStyle = 'rgba(0,0,0,.78)';
           paint.fillRect(34, 463, 892, 56);
           paint.fillStyle = 'white';
           paint.font = '28px Microsoft YaHei, sans-serif';
           paint.textAlign = 'center';
           paint.fillText(page, 480, 500, 860);
+          paint.restore();
         }
       }
       draw();
@@ -255,8 +259,9 @@ export function setupMedia(get, currentDraft) {
   const voiceCache = new Map();
   const animationCache = new Map();
 
-  async function voiceFor(context, text) {
-    if (voiceCache.has(text)) return voiceCache.get(text);
+  async function voiceFor(context, text, language) {
+    const key = JSON.stringify([language, text]);
+    if (voiceCache.has(key)) return voiceCache.get(key);
     let clip;
     if (!text.trim()) {
       clip = context.createBuffer(1, context.sampleRate, context.sampleRate);
@@ -264,13 +269,16 @@ export function setupMedia(get, currentDraft) {
       const response = await fetch('/api/voice', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({text}),
+        body: JSON.stringify({text, language}),
         signal: AbortSignal.timeout(45000),
       });
-      if (!response.ok) throw new Error('配音暂不可用，可以导出无声动画。');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || '配音暂不可用，可以导出无声动画。');
+      }
       clip = await context.decodeAudioData(await response.arrayBuffer());
     }
-    voiceCache.set(text, clip);
+    voiceCache.set(key, clip);
     if (voiceCache.size > 30) voiceCache.delete(voiceCache.keys().next().value);
     return clip;
   }
@@ -366,6 +374,9 @@ export function setupMedia(get, currentDraft) {
 
   async function play(exporting, narrated = false) {
     const draft = currentDraft();
+    const height = Number(get('exportHeight').value);
+    stage.width = Math.round(height * 8 / 9) * 2;
+    stage.height = height;
     const buttons = [get('play'), get('animationDownload'), get('voiceDownload')];
     buttons.forEach(button => { button.disabled = true; });
     let audioContext;
@@ -375,13 +386,13 @@ export function setupMedia(get, currentDraft) {
         audioContext = new AudioContext();
         await audioContext.resume();
         status.textContent = '正在按分镜生成旁白…';
-        clips = await Promise.all(draft.scenes.map(scene => voiceFor(audioContext, scene.narration)));
+        clips = await Promise.all(draft.scenes.map(scene => voiceFor(audioContext, scene.narration, draft.language)));
       }
       if (exporting) {
         const segments = [];
         let rendered = 0;
         for (const [index, scene] of draft.scenes.entries()) {
-          const key = JSON.stringify([draft.topic, draft.style, narrated, scene]);
+          const key = JSON.stringify([draft.topic, draft.style, draft.language, height, narrated, scene]);
           let blob = animationCache.get(key);
           if (!blob) {
             status.textContent = `正在渲染第 ${index + 1} 镜，请保持页面开启。`;
@@ -394,7 +405,7 @@ export function setupMedia(get, currentDraft) {
         }
         const blob = segments.length === 1 ? segments[0].blob : await combineTakes(segments, false, segment => {
           status.textContent = `正在合成动画 ${segment}/${segments.length}，请保持页面开启。`;
-        });
+        }, height);
         if (!blob.size) throw new Error('浏览器没有生成视频数据。');
         const note = await exportVideo(blob, `${draft.topic}-动画`);
         status.textContent = `动画已导出。新渲染 ${rendered} 镜，复用 ${segments.length - rendered} 镜。${note}`;
@@ -494,7 +505,7 @@ export function setupMedia(get, currentDraft) {
     try {
       const blob = await combineTakes(selectedTakes, get('includeCaptions').checked, segment => {
         status.textContent = `正在合成第 ${segment}/${selectedTakes.length} 段，请保持页面开启。`;
-      });
+      }, Number(get('exportHeight').value));
       if (!blob.size) throw new Error('浏览器没有生成视频数据。');
       const note = await exportVideo(blob, `${draft.topic}-真人口播`);
       status.textContent = '完整口播已导出。' + note;

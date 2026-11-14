@@ -194,13 +194,15 @@ async function main([command, first, second]) {
       return;
     }
     case 'render': {
-      if (!first) throw new Error('用法：render <episode.json> [--ep=01] [--title=] [--out=]');
-      const episode = validateEpisode(await read(first));
+      if (!first) throw new Error('用法：render <episode.json> [--resolution=720p] [--ep=01] [--title=] [--out=]');
+      const config = await read(first);
+      const episode = validateEpisode({...config, resolution: flag('resolution') ?? config.resolution});
       const prefs = episode.preferences ?? {};
       if (!trackIds.includes(prefs.track)) throw new Error('render 需要 project.preferences.track，先确认用户赛道');
       const series = seriesName(prefs, defaultSeries(prefs.track, episode.title));
       const target = flag('out') ? resolve(flag('out')) : join(outputRoot, prefs.track, series,
-        artifactName({title: flag('title') ?? episode.title, ep: flag('ep') ?? '01', ratio: episode.ratio}));
+        artifactName({title: flag('title') ?? episode.title, ep: flag('ep') ?? '01', ratio: episode.ratio,
+          ext: episode.resolution && episode.resolution !== '1080p' ? '-' + episode.resolution + '.mp4' : '.mp4'}));
       await mkdir(dirname(target), {recursive: true});
       const workDir = await mkdtemp(join(tmpdir(), 'woframe-render-'));
       try {
@@ -251,7 +253,7 @@ async function main([command, first, second]) {
       return;
     }
     default:
-      throw new Error('用法：woframe.mjs doctor | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--ep=] [--title=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
+      throw new Error('用法：woframe.mjs doctor | setup [--install] | check <episode.json> [--strict] | fit <episode.json> [--write] | handbooks | find-handbook <系列名> | save-handbook <episode.json> | apply-handbook <handbook.json> <episode.json> | render <episode.json> [--resolution=] [--ep=] [--title=] [--out=] | deliver <文件> --track= --series= --ep= --title= [--ratio=] [--cover]');
   }
 }
 

@@ -1,3 +1,5 @@
+import {languages} from './languages.mjs';
+
 const topics = [
   ['微信', '即时通信', '朋友圈', '微信支付'],
   ['微商', '社交电商', '朋友圈卖货'],
@@ -24,7 +26,10 @@ const topicTitles = {
   '二次函数': ['为什么一些变化可以用抛物线描述', '人们怎样认识与研究抛物线', '一步步找出抛物线的顶点'],
 };
 
-export function directionsFor(topic) {
+export function directionsFor(topic, language = 'zh-CN') {
+  if (language !== 'zh-CN') return angles.map((angle, index) => ({
+    id: angle.id, name: languages[language].directions[index], detail: languages[language].details[index],
+  }));
   const titles = Object.hasOwn(topicTitles, topic) ? topicTitles[topic] : null;
   return angles.map((angle, index) => ({
     ...angle,
@@ -98,7 +103,14 @@ export function suggest(input) {
   return [...new Set(matches)].slice(0, 5);
 }
 
-export function buildDraft({topic, angle, format, style, keywords}, opening) {
+export function buildDraft({topic, angle, format, style, keywords, language = 'zh-CN'}, opening) {
+  if (language !== 'zh-CN') {
+    const template = languages[language];
+    return {topic, angle, format, style, keywords, language, isExample: false,
+      scenes: ['opening', 'explain', 'ending'].map((id, index) => ({
+        id, title: template.titles[index], narration: template.outline[index], visual: visualFor([]),
+      }))};
+  }
   const example = examples[topic]?.[angle];
   const middle = {
     background: '用三句话讲清楚它出现之前，人们遇到了什么问题，以及它解决了哪一部分。',
@@ -111,7 +123,7 @@ export function buildDraft({topic, angle, format, style, keywords}, opening) {
     keywords ? `用一个包含「${keywords}」的例子检验理解。` : '用一个具体例子检验理解，再用一句话收尾。',
   ];
   return {
-    topic, angle, format, style, keywords,
+    topic, angle, format, style, keywords, language,
     isExample: Boolean(example),
     scenes: text.map((narration, index) => ({
       id: ['opening', 'explain', 'ending'][index],

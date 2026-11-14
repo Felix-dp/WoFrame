@@ -16,6 +16,24 @@
 
 没有服务端配置时，工作台使用本地通用方向、示例讲稿和分镜提纲。真实 AI 初稿需要用户校对。
 
+「写稿模型」下拉框可用于选题、写稿和改稿。设置 `OPENAI_API_KEY` 与 `OPENAI_MODEL` 可在已有配置旁添加 OpenAI 模型。多个兼容接口或同一接口的多个模型可通过 `STUDIO_AI_PROFILES` 配置。该环境变量是 JSON 数组，每项包含 `id`、`label`、`url`、`model` 和 `keyEnv`。例如：
+
+```json
+[
+  {
+    "id": "custom-fast",
+    "label": "自定义快速模型",
+    "url": "https://provider.example/v1/chat/completions",
+    "model": "provider-model-id",
+    "keyEnv": "MY_PROVIDER_API_KEY"
+  }
+]
+```
+
+`keyEnv` 填保存在服务端的密钥环境变量名。兼容接口须支持 `response_format: {"type":"json_object"}`，调整配置后重启工作台。
+
+「内容语言」支持简体中文、英语、日语，影响选题、文稿、画面文本和合成旁白。Windows 需安装所选语言的系统语音包。系统阻止运行本地配音脚本时，可使用下文的 Edge 语音。动画和整条口播支持 480p、540p、720p、1080p，工作台沿用 540p 默认值。
+
 ## 浏览器验收
 
 在工作区运行 `node studio/browser-smoke.mjs "<Chrome 或 Edge 的绝对路径>" --ai`，可用本地模拟模型验证选题、写稿、改稿和回退。配置 DeepSeek 密钥或通用接口变量后，把参数换成 `--live-ai` 即可对真实模型执行同一套交互验收。测试使用「自行车速度」和「速度表」作为样例输入。它会验证页面是否收到并应用了内容，事实和教学质量仍需人工审阅。

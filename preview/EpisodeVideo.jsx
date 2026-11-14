@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Html5Video, Sequence, staticFile} from 'remotion';
+import {episodeSizes, episodeComposition} from './episode.mjs';
 
 export function EpisodeVideo({project, assetBase, onError}) {
   const asset = name => {
@@ -7,7 +8,11 @@ export function EpisodeVideo({project, assetBase, onError}) {
     return assetBase ? new URL(path, assetBase).href : staticFile(name);
   };
   let from = 0;
-  return <AbsoluteFill style={{background: '#172638', color: '#fff', fontFamily: 'system-ui, sans-serif'}}>
+  const base = episodeSizes[project.ratio];
+  const {width, height} = episodeComposition(project);
+  return <AbsoluteFill lang={project.language} style={{background: '#172638', color: '#fff', fontFamily: 'system-ui, sans-serif'}}>
+    <AbsoluteFill style={{width: base.width, height: base.height, right: 'auto', bottom: 'auto',
+      transform: `scale(${width / base.width}, ${height / base.height})`, transformOrigin: 'top left'}}>
     {project.bgm && <Audio src={asset(project.bgm)} volume={0.15} loop onError={() => onError?.('背景音乐加载失败')} />}
     {project.scenes.map((scene, index) => {
       const start = from;
@@ -21,5 +26,6 @@ export function EpisodeVideo({project, assetBase, onError}) {
         {scene.caption && <div style={{position: 'absolute', bottom: '12%', left: '8%', right: '8%', padding: '2%', textAlign: 'center', background: '#101b28ee', fontSize: 44}}>{scene.caption}</div>}
       </Sequence>;
     })}
+    </AbsoluteFill>
   </AbsoluteFill>;
 }

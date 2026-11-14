@@ -1,6 +1,6 @@
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {createAi, ModelError, modelSettings} from './ai.mjs';
+import {configuredModels, createAi, ModelError} from './ai.mjs';
 import {synthesizeSpeech} from './voice.mjs';
 import {hasMp4Encoder, toMp4} from './mp4.mjs';
 
@@ -16,11 +16,14 @@ const files = new Map([
   ['/app.mjs', ['app.mjs', 'text/javascript; charset=utf-8']],
   ['/draft.mjs', ['draft.mjs', 'text/javascript; charset=utf-8']],
   ['/media.mjs', ['media.mjs', 'text/javascript; charset=utf-8']],
+  ['/languages.mjs', ['languages.mjs', 'text/javascript; charset=utf-8']],
   ['/takes.mjs', ['takes.mjs', 'text/javascript; charset=utf-8']],
 ]);
 const port = Number(process.env.STUDIO_PORT ?? 4173);
-const model = modelSettings(process.env);
-const generate = createAi(model);
+const models = configuredModels(process.env);
+const generators = new Map([...models].map(([id, config]) => [id, createAi(config)]));
+const defaultGenerator = generators.values().next().value ?? createAi({});
+const modelOptions = [...models].map(([id, {label}]) => ({id, label}));
 const mp4Available = hasMp4Encoder();
 let transcoding = false;
 
@@ -28,7 +31,7 @@ createServer(async (request, response) => {
   const path = request.url?.split('?')[0];
   if (request.method === 'GET' && path === '/api/status') {
     response.writeHead(200, {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store'})
-      .end(JSON.stringify({aiConfigured: Boolean(model.url && model.key && model.model), mp4Available: await mp4Available}));
+      .end(JSON.stringify({aiConfigured: models.size > 0, models: modelOptions, mp4Available: await mp4Available}));
     return;
   }
   if (request.method === 'POST' && path === '/api/mp4') {
@@ -75,16 +78,22 @@ createServer(async (request, response) => {
           response.writeHead(400).end();
           return;
         }
-        const {audio, contentType} = await synthesizeSpeech(input.text);
+        const {audio, contentType} = await synthesizeSpeech(input.text, input.language);
         response.writeHead(200, {'Content-Type': contentType, 'Cache-Control': 'no-store'}).end(audio);
         return;
       }
+      const generate = input?.modelId ? generators.get(input.modelId) : defaultGenerator;
+      if (!generate) throw new ModelError(400, '请选择服务端已配置的模型。');
+      const data = await generate(path.slice(5), input);
       response.setHeader('Content-Type', 'application/json; charset=utf-8');
-      response.end(JSON.stringify({data: await generate(path.slice(5), input)}));
+      response.end(JSON.stringify({data}));
     } catch (error) {
       const upstream = error instanceof ModelError;
+      const message = upstream || error.code === 'VOICE_SCRIPT_POLICY' ? error.message
+        : path === '/api/voice' ? '配音失败，请检查所选语言的系统语音包或 Edge 语音配置。'
+          : '生成暂未成功，请重试。';
       response.writeHead(upstream ? error.status : path === '/api/voice' ? 503 : 422, {'Content-Type': 'application/json; charset=utf-8'})
-        .end(JSON.stringify({error: upstream ? error.message : '生成暂未成功，请重试。'}));
+        .end(JSON.stringify({error: message}));
     }
     return;
   }

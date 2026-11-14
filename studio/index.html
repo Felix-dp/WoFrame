@@ -23,6 +23,8 @@ button,select,input[type=search]{min-height:44px}
 <header>开讲 · 知识视频工作台 <small id="modelStatus" role="status"></small></header>
 <h1>从一个词，开始讲。</h1>
 <p>先找一个想讲的角度，再选动画或自己出镜。</p>
+<div class="row"><label>内容语言 <select id="contentLanguage"></select></label>
+<label>写稿模型 <select id="writingModel" disabled><option value="">默认</option></select></label></div>
 <section>
 <h2><label for="topic">你想讲什么？</label></h2>
 <form id="topicForm"><input id="topic" type="search" placeholder="试试「微」或「概率」" required maxlength="120" autocomplete="off"></form>
@@ -51,6 +53,7 @@ button,select,input[type=search]{min-height:44px}
 <section id="production" hidden>
 <h2>工作台预览与试片</h2>
 <p>正式成片请从项目的 Remotion 预览页生成并回看。</p>
+<label>导出画质 <select id="exportHeight"><option value="540">540p</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select></label>
 <label id="mp4Option" hidden><input id="preferMp4" type="checkbox" checked> 导出为 MP4</label>
 <div id="animationTools" hidden>
 <canvas id="stage" width="960" height="540" style="width:100%;border-radius:12px" aria-label="动画预览"></canvas>

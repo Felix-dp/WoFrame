@@ -1,10 +1,10 @@
-param([string]$InputPath, [string]$OutputPath)
+param([string]$InputPath, [string]$OutputPath, [string]$Language = 'zh-CN')
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $studioSpeechType = [Windows.Media.SpeechSynthesis.SpeechSynthesizer,Windows.Media.SpeechSynthesis,ContentType=WindowsRuntime]
 $studioStreamType = [Windows.Media.SpeechSynthesis.SpeechSynthesisStream,Windows.Media.SpeechSynthesis,ContentType=WindowsRuntime]
-$studioVoice = $studioSpeechType::AllVoices | Where-Object Language -eq 'zh-CN' | Select-Object -First 1
-if (-not $studioVoice) { throw 'No zh-CN Windows voice is installed.' }
+$studioVoice = $studioSpeechType::AllVoices | Where-Object Language -eq $Language | Select-Object -First 1
+if (-not $studioVoice) { throw "No Windows voice for $Language is installed." }
 $studioSynth = New-Object $studioSpeechType.FullName
 try {
     $studioSynth.Voice = $studioVoice
