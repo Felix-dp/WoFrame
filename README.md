@@ -9,7 +9,7 @@
 
 <p align="center">
   <img alt="node" src="https://img.shields.io/badge/Node-%E2%89%A522.12-2F6B4F?style=flat-square">
-  <img alt="agent" src="https://img.shields.io/badge/Agent-Codex%20%7C%20Claude%20Code-1F3A5F?style=flat-square">
+  <img alt="推荐 Agent：Codex 或 Claude Code" src="https://img.shields.io/badge/Recommended%20Agent-Codex%20%7C%20Claude%20Code-1F3A5F?style=flat-square">
   <img alt="platform" src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-BE6440?style=flat-square">
   <img alt="BoHack" src="https://img.shields.io/badge/BoHack-2026.11-8C978D?style=flat-square">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-2F6B4F?style=flat-square"></a>
@@ -19,7 +19,7 @@
 
 ## 这是什么
 
-**WoFrame（一帧）** 是一套面向知识短视频创作者的 Agent 工作流。把仓库克隆到本地，用 Codex、Claude Code 等支持读取 `AGENTS.md` 的工具打开，就可以从一个选题开始，逐步确定脚本、素材、配音和发布画幅。
+**WoFrame（一帧）** 是一套面向知识短视频创作者的 Agent 工作流。把仓库克隆到本地，用能读取 `AGENTS.md`、访问项目文件并运行项目命令的 Agent 打开即可开始。推荐使用 Codex 或 Claude Code。
 
 读书短片可以随旁白更换主图、逐步展开图解。真人口播可以在保留原声的同时，切换全屏和讲解小窗。做成系列后，下一集可以沿用已确认的画面风格和声音。
 
@@ -94,11 +94,13 @@ Apple Silicon Mac 和 Windows x64 上需要本地 AI 旁白时，运行 `node sc
 
 ### 3. 在 Agent 里开工
 
-在这个目录打开 Codex 或 Claude Code，直接说：
+把 WoFrame 目录打开为 Agent 的工作区，开始对话。带着已有选题、文稿或素材可以开工，也可以先和 Agent 一起梳理创作方向。
 
-> 用 `$woframe` 做一条 60 秒不露脸视频，主题是「机会成本」
+1. Agent 先检查有没有可沿用的系列 Handbook，再和你确认赛道。
+2. 按所选赛道逐步回答问题。例如，系列视频会先确认选题、受众和发布规格，审过文稿后再确定配音、画面和素材。
+3. 看首版，给出修改意见。确认成片后，系列项目可把本集定下的做法保存到 Handbook，留给下一集。
 
-也可以只说你的定位，由 Agent 先定赛道再往下问。Agent 会先跑 `handbooks` 看有没有可复用的系列沉淀，再开始提问。
+如果你的 Agent 支持 Skill 调用，可以用 `$woframe` 开始。也可以直接在仓库工作区和 Agent 对话，由它按 [`AGENTS.md`](AGENTS.md) 中的工作流推进。
 
 ### 4. 一条片子会走过的命令
 
