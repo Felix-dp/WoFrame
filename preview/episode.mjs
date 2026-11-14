@@ -1,3 +1,13 @@
+export const tracks = ['traffic', 'vertical', 'persona'];
+
+export const episodeSizes = {
+  '9:16': {width: 1080, height: 1920},
+  '16:9': {width: 1920, height: 1080},
+  '3:4': {width: 1080, height: 1440},
+  '4:3': {width: 1440, height: 1080},
+  '1:1': {width: 1080, height: 1080},
+};
+
 function localAsset(value) {
   if (!value) return;
   if (typeof value !== 'string' || !value.split('/').every(part =>
@@ -12,8 +22,13 @@ export function validateEpisode(project) {
   if (typeof title !== 'string' || !title.trim() || !['talking-head', 'faceless'].includes(route)) {
     throw new Error('请填写标题，选择 talking-head 或 faceless');
   }
-  if (!['9:16', '16:9'].includes(ratio) || !Number.isInteger(fps) || fps < 1 || fps > 60) {
-    throw new Error('请使用 9:16 或 16:9 画幅，以及 1–60 的整数 FPS');
+  const track = project.preferences?.track;
+  if (track != null && !tracks.includes(track)) throw new Error(`赛道须为 ${tracks.join('、')}`);
+  if (typeof ratio !== 'string' || !Object.hasOwn(episodeSizes, ratio)) {
+    throw new Error(`画幅须为 ${Object.keys(episodeSizes).join('、')}`);
+  }
+  if (!Number.isInteger(fps) || fps < 1 || fps > 60) {
+    throw new Error('请使用 1–60 的整数 FPS');
   }
   if (!Array.isArray(scenes) || !scenes.length) throw new Error('请添加分镜');
   localAsset(bgm);
@@ -34,4 +49,16 @@ export function validateEpisode(project) {
   });
   if (!Number.isSafeInteger(duration)) throw new Error('总帧数超出范围');
   return {...project, ratio, fps, duration};
+}
+
+export function episodeComposition(project) {
+  return {
+    ...episodeSizes[project.ratio],
+    durationInFrames: project.duration,
+    fps: project.fps,
+  };
+}
+
+export function isEpisodePath(pathname) {
+  return /^\/(work|examples)\/.+\.json$/.test(pathname);
 }

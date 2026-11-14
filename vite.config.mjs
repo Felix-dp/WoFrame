@@ -1,10 +1,11 @@
 import {fileURLToPath} from 'node:url';
 import {defineConfig} from 'vite';
+import {renderEpisodePlugin} from './preview/render-server.mjs';
 
 export default defineConfig(({command}) => ({
   root: fileURLToPath(new URL('./preview', import.meta.url)),
   publicDir: command === 'serve' ? fileURLToPath(new URL('./public', import.meta.url)) : false,
-  plugins: [{
+  plugins: [renderEpisodePlugin(), {
     name: 'woframe-example',
     apply: 'build',
     async generateBundle() {
