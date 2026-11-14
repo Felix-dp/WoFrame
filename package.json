@@ -2,7 +2,9 @@
   "name": "woframe",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=22.12"},
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "studio": "node studio/server.mjs",
     "preview": "vite --host 127.0.0.1",
@@ -15,5 +17,9 @@
     "react-dom": "19.2.0",
     "remotion": "4.0.436"
   },
-  "devDependencies": {"vite": "^7.3.0"}
+  "devDependencies": {
+    "@remotion/bundler": "4.0.436",
+    "@remotion/renderer": "4.0.436",
+    "vite": "^7.3.0"
+  }
 }
