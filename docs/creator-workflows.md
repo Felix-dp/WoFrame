@@ -95,12 +95,14 @@ node scripts/woframe.mjs deliver "./hypit-out.mp4" --track=traffic --series=泛�
 确认后再问三件事：
 
 - 素材来源：录好的视频和其他素材放进 `public/work/<项目>/`。Ⅱ 可用文字图解或录屏，静态图可先制成分镜视频。Ⅲ 暂无素材时先交提词和分镜，必要的出镜镜头齐备后再渲染
-- 音频：确认主声轨用视频原声、独立旁白还是无旁白，再单独决定 BGM。合成旁白可按 [可选依赖](environment.md#可选依赖) 生成音频后填入分镜
+- 音频：确认主声轨用视频原声、独立旁白还是无旁白。合成旁白可按 [可选依赖](environment.md#可选依赖) 生成音频后填入分镜
 - 视觉效果：字幕、画面风格；第一集还要定封面方向（见 [封面风格](cover-styles.md)）
 
-### 2 成片
+### 2 首版与定稿
 
-按 [示例](../public/examples/episode.json) 组装项目 JSON，用 `ratio` 从 `9:16`、`16:9`、`3:4`、`4:3` 和 `1:1` 选择画幅。素材路径相对项目 JSON。每个分镜包含 `frames`，可带 `caption`、`text`、`video` 或 `audio`；`bgm` 为项目级背景音乐。露脸口播每镜要有视频；不露脸可以只用文字与字幕。分镜音频和视频原声同时存在时，视频静音。时长由帧数和 FPS 决定，按实际素材时长对齐；需要逐字字幕时拆成更短的字幕区间。
+按 [示例](../public/examples/episode.json) 组装项目 JSON，用 `ratio` 从 `9:16`、`16:9`、`3:4`、`4:3` 和 `1:1` 选择画幅。素材路径相对项目 JSON。每个分镜包含 `frames`，可带 `caption`、`text`、`video` 或 `audio`。露脸口播每镜要有视频；不露脸可以只用文字与字幕。分镜音频和视频原声同时存在时，视频静音。时长由帧数和 FPS 决定，按实际素材时长对齐；需要逐字字幕时拆成更短的字幕区间。
+
+按 [Remotion 默认动效](remotion-motion.md) 把比较、按钮、步骤和数字随讲解写进 `motion`。同一块内容在相邻镜头中延续时，复用标题和已经出现的元素；口播解释图文时可用人像小窗。
 
 先跑 `node scripts/woframe.mjs check <项目.json> --strict`。如果时长不匹配，`fit --write` 优先按独立旁白对齐，否则按露脸口播原片重算 `frames`。若独立旁白比镜头长，补足镜头后再检查：
 
@@ -108,17 +110,34 @@ node scripts/woframe.mjs deliver "./hypit-out.mp4" --track=traffic --series=泛�
 node scripts/woframe.mjs fit "public/work/<项目>/episode.json" --write
 ```
 
-需要逐镜核对时用 `npm run preview` 看字幕、音画和报错。确认后 `render` 出片：
+用确认过的画面、字幕和主声轨导出审片版。首集先出无 BGM 版本，续集按下方规则继承配乐。需要逐镜核对时可用 `npm run preview`。先做主发画幅，把审片文件放在本集项目目录：
 
 ```sh
-node scripts/woframe.mjs render "public/work/<项目>/episode.json" --ep=01
+node scripts/woframe.mjs render "public/work/<项目>/episode.json" --ratio=9:16 --out="public/work/<项目>/review.mp4"
 ```
 
-成片直接写到 `output/<track>/<系列名>/`。配置了多个发布入口时，同画幅共用一条 MP4，并按主发入口优先渲染。只重做一个画幅时可加 `--ratio=16:9`。**先看再定稿**：用户在本地播放验收，通过才算完成。
+按项目实际主发画幅替换示例中的 `9:16`。
+
+#### 审片后决定 BGM
+
+Ⅱ 不露脸垂直和 Ⅲ 露脸个人 IP 使用同一套规则。首集由用户看过无 BGM 首版后决定是否配乐。Agent 可根据首版建议进出时间和留白段落，用实际画面和主声轨试听。
+
+- **用户提供音乐**：用上传的曲目配实际画面与原声或旁白，试听入点、音量和收尾。
+- **Agent 选曲**：确认使用许可后，用同一段首版画面和主声轨做候选预览，与无 BGM 首版对照。
+
+试听确认后，由用户决定这套配乐仅用于本集，还是留给后续集数。仅用于本集就记录本集的曲目和分段用法。用户确认留作系列默认时，再把选定的音频保存到系列音频目录，并在 Handbook 记录曲目及默认用法。目录位置和字段由 WoFrame 处理。
+
+续集开工先查同系列的 Handbook、系列音频目录和已有参考成片。用参考成片回看音乐在哪里进出、和主声轨怎么配；混音使用确认过的曲目原音频。有可用的系列配乐时，按本集画面和原声调整时间与音量，直接用于审片版。已确认系列默认无 BGM 时，续集也沿用。暂时找不到可用曲目或默认用法时，先出无 BGM 首版，再按需安排试听。单集临时静音或改用其他曲目时，只更新本集设置。
+
+用户审片通过后，再输出最终 MP4 到 `output/<track>/<系列名>/`。配置了多个发布入口时，同画幅共用一条 MP4，并按主发入口优先渲染。具体的分段混音、系列目录及 Handbook 曲目与用法字段属于后续 BGM 实现，当前项目的 `bgm` 字段支持整片循环。
 
 ### 3 交付
 
 MP4 已经在 `output/<track>/<系列名>/`。封面用 [封面风格](cover-styles.md) 的工具出图，再用 `deliver --cover` 放进同一目录；采样帧的场合给出明确时间点。
+
+### Ⅲ 露脸口播模板
+
+收到拍摄素材后，默认用 [露脸口播模板](persona-video-template.md) 安排全屏与右下小窗。允许一条完整录制跨多个分镜，通过 `videoStartFrame` 记录原片起点。
 
 ### Ⅲ 比 Ⅱ 多问的四件
 
@@ -131,7 +150,7 @@ MP4 已经在 `output/<track>/<系列名>/`。封面用 [封面风格](cover-sty
 
 ## 系列：第一集确认后
 
-Ⅱ 和 Ⅲ 才有系列。第一集验收完成后把这一轮问出来的答案落盘：
+Ⅱ 和 Ⅲ 才有系列。第一集最终版验收后再保存系列设定。配乐的系列默认值在用户听过实际效果并确认后沉淀，再执行保存：
 
 ```sh
 node scripts/woframe.mjs save-handbook public/work/episode-1/episode.json
